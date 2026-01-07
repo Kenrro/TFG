@@ -2,6 +2,7 @@ package com.authservice.auth.service;
 
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.authservice.auth.dto.auth.AuthLoginCustomerRequestDto;
 import com.authservice.auth.dto.auth.AuthLoginEmployeeRequestDto;
@@ -21,6 +22,7 @@ import jakarta.validation.ConstraintViolationException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -56,7 +58,7 @@ public class AuthenticationService {
 
        } catch (DataIntegrityViolationException e) {
               throw new AuthException(
-                AuthError.ALREDY_EXIST_A_USER_WITH_THE_SAME_NAME
+                AuthError.ALREDY_EXIST_A_USER_WITH_THE_SAME_PHONE
               );
        }
        catch (ConstraintViolationException e) {
@@ -70,6 +72,29 @@ public class AuthenticationService {
               );
        }
     } 
+    @Transactional
+    public void updateCustomer(Long id, AuthUpdateCustomerRequestDto request) {
+        User user = userRepository.findById(id)
+        .orElseThrow(() -> new AuthException(AuthError.USER_NOT_FOUND));
+        if (user.getRole() != null && user.getRole() != Role.CUSTOMER) {
+            throw new AuthException(AuthError.INVALID_ROLE_UPDATE_CUSTOMER);
+        }
+
+        if (request.getUsername() != null
+            && !request.getUsername().isBlank()
+            && !request.getUsername().equals(user.getUsername())) {
+            user.setUsername(request.getUsername());
+        }
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (request.getName() != null && !request.getName().isEmpty() && !request.getName().equals(user.getName())) {
+            user.setName(request.getName());
+        }
+        if (request.getLastname() != null && !request.getLastname().isEmpty() && !request.getLastname().equals(user.getLastname())) {
+            user.setLastname(request.getLastname());
+        }
+    }
     // LOGIN CUSTOMER --------------------------------
     public AuthResponseDto loginCustomer(AuthLoginCustomerRequestDto requestDto) {
         try {
@@ -94,6 +119,20 @@ public class AuthenticationService {
             throw new AuthException(AuthError.ERROR_LOGIN_CUSTOMER);
         }
     }
+    // Delete customer ------------------------------
+    @Transactional
+    public void deleteCustomer() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+         try {
+            User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new AuthException(AuthError.USER_NOT_FOUND));
+            userRepository.deleteById(user.getId());
+        } catch (DataAccessException e) {
+            throw new AuthException(AuthError.DATABASE_ERROR);
+        }
+    }
+    // -------------------------
+
     // Register employee --------------------------------
     private String getEstablishmentCode() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -112,7 +151,8 @@ public class AuthenticationService {
         // Lógica para asociar el empleado al establecimiento
         return true;
     }
-    public boolean registerEmployee(AuthRegisterEmployeeRequestDTO request) {
+    @Transactional
+    public void registerEmployee(AuthRegisterEmployeeRequestDTO request) {
         User user = User.builder()
             .username(request.getUsername())
             .password(passwordEncoder.encode(request.getPassword()))
@@ -122,16 +162,13 @@ public class AuthenticationService {
             .build();
         String establishmentCode = getEstablishmentCode();
         if (establishmentCode == null) throw new RuntimeException("User is not admin");
-        if (addToEmployeeEstablishment(user, establishmentCode)) throw new RuntimeException("Error associating employee to establishment");
+        if (!addToEmployeeEstablishment(user, establishmentCode)) throw new AuthException(AuthError.ERROR_ASOSCIATING_EMPLOYEE_ESTABLISHMENT);
         try {
             userRepository.save(user);
-            return true;
         } catch (DataIntegrityViolationException e) {
-            throw new AuthException(AuthError.ALREDY_EXIST_A_USER_WITH_THE_SAME_NAME);
+            throw new AuthException(AuthError.ALREDY_EXIST_A_USER_WITH_THE_SAME_PHONE);
         } catch (ConstraintViolationException e) {
             throw new AuthException(AuthError.INVALID_USER_DATA);
-        } catch (Exception e) {
-            throw new AuthException(AuthError.ERROR_CREATING_USER);
         }
     }
     public void createEstablishmentAdmin(AuthRegisterEmployeeRequestDTO request) {
@@ -145,12 +182,10 @@ public class AuthenticationService {
         try {
             userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
-            throw new AuthException(AuthError.ALREDY_EXIST_A_USER_WITH_THE_SAME_NAME);
+            throw new AuthException(AuthError.ALREDY_EXIST_A_USER_WITH_THE_SAME_PHONE);
         } catch (ConstraintViolationException e) {
             throw new AuthException(AuthError.INVALID_USER_DATA);
-        } catch (Exception e) {
-            throw new AuthException(AuthError.ERROR_CREATING_USER);
-        }
+        } 
     }
     public AuthResponseDto loginEmployee(AuthLoginEmployeeRequestDto request) {
         User user;
@@ -166,9 +201,7 @@ public class AuthenticationService {
             throw new AuthException(AuthError.INVALID_CREDENTIALS);
         } catch (DataAccessException e) {
             throw new AuthException(AuthError.DATABASE_ERROR);
-        } catch (Exception e) {
-            throw new AuthException(AuthError.ERROR_LOGIN_CUSTOMER);
-        }
+        } 
         if (isUserEmployed(user.getId(), request.getEstablishmentCode()) == false) {
             // recibir el error del microservicio de establecimientos
             throw new RuntimeException("User is not employed in the establishment");
@@ -178,6 +211,7 @@ public class AuthenticationService {
             .token(token)
             .build();
     }
+    @Transactional
     public void updateEmployee(Long id, AuthUpdateCustomerRequestDto request) {
         if (request.getRole() != null && request.getRole() != Role.ADMIN && request.getRole() != Role.SELLER) {
             throw new AuthException(AuthError.INVALID_ROLE_UPDATE_EMPLOYEE);
@@ -204,9 +238,23 @@ public class AuthenticationService {
         }
         try {
             userRepository.save(user);
-        } catch (Exception e) {
-            throw new AuthException(AuthError.ERROR_CREATING_EMPLOYEE);
+        } catch (DataIntegrityViolationException e) {
+            throw new AuthException(AuthError.ALREDY_EXIST_A_USER_WITH_THE_SAME_PHONE);
+        } catch (ConstraintViolationException e) {
+            throw new AuthException(AuthError.INVALID_USER_DATA);
         }
-
     }
+    @Transactional
+    public void deleteEmployee(Long id) {
+        try {
+            userRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new AuthException(AuthError.USER_NOT_FOUND);
+        } catch (DataAccessException e) {
+            throw new AuthException(AuthError.DATABASE_ERROR);
+        }
+    }
+    
+
 }
+    
