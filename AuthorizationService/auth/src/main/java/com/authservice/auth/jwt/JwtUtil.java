@@ -38,6 +38,18 @@ public class JwtUtil {
         this.privateKey = kf.generatePrivate(spec);
         
     }
+    // Generate token for service-to-service authentication
+    public String generateServiceToken(String serviceName) {
+        Date now = new Date();
+        Date exp = new Date(System.currentTimeMillis() + expirationMs);
+        return Jwts.builder()
+            .setSubject(serviceName)
+            .claim("role", "ROLE_SERVICE")
+            .setIssuedAt(now)
+            .setExpiration(exp)
+            .signWith(privateKey, SignatureAlgorithm.RS256)
+            .compact();
+    }
     public String generateToken(User user) {
         Date now = new Date();
         Date exp = new Date(System.currentTimeMillis() + expirationMs);
@@ -80,7 +92,7 @@ public class JwtUtil {
             return false;
         }
     }
-    private Claims getClaims(String token) {
+    public Claims getClaims(String token) {
         return Jwts.parserBuilder()
             .setSigningKey(privateKey)
             .build()

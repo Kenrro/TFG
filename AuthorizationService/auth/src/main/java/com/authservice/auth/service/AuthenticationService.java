@@ -134,6 +134,7 @@ public class AuthenticationService {
     // -------------------------
 
     // Register employee --------------------------------
+    // TODO: Make the communication with establishment service to associate employee to establishment
     private String getEstablishmentCode() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User admin = (User) auth.getPrincipal();

@@ -9,6 +9,7 @@ import com.authservice.auth.dto.auth.AuthRegisterCustomerRequestDto;
 import com.authservice.auth.dto.auth.AuthRegisterEmployeeRequestDTO;
 import com.authservice.auth.dto.auth.AuthResponseDto;
 import com.authservice.auth.dto.auth.AuthUpdateCustomerRequestDto;
+import com.authservice.auth.jwt.JwtUtil;
 import com.authservice.auth.service.AuthenticationService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,11 +39,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 )
 public class AuthenticationController {
 
+    private final JwtUtil jwtUtil;
+
     // TODO: IMPLEMENT open api SPECIFICATION 👍
     // Upgrade springdoc especifications for more information for the user👍
     // implement validations 👍
     // activate h2 console 👍
     private final AuthenticationService authenticationService;
+
+
 
     
     // Customer Endpoints
@@ -255,6 +260,12 @@ public class AuthenticationController {
         authenticationService.deleteEmployee(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+    @PostMapping("/test")
+    public String postMethodName(@RequestBody String entity) {
+        
+        return jwtUtil.generateServiceToken("auth-service");
+    }
+    
     
     
     
