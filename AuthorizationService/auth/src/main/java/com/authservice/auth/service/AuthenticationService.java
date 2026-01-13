@@ -4,6 +4,7 @@ package com.authservice.auth.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.authservice.auth.dto.auth.AuthCreateEstablishMentAdminResponseDto;
 import com.authservice.auth.dto.auth.AuthLoginCustomerRequestDto;
 import com.authservice.auth.dto.auth.AuthLoginEmployeeRequestDto;
 import com.authservice.auth.dto.auth.AuthRegisterCustomerRequestDto;
@@ -172,7 +173,7 @@ public class AuthenticationService {
             throw new AuthException(AuthError.INVALID_USER_DATA);
         }
     }
-    public void createEstablishmentAdmin(AuthRegisterEmployeeRequestDTO request) {
+    public AuthCreateEstablishMentAdminResponseDto createEstablishmentAdmin(AuthRegisterEmployeeRequestDTO request) {
         User user = User.builder()
             .username(request.getUsername())
             .password(passwordEncoder.encode(request.getPassword()))
@@ -182,6 +183,9 @@ public class AuthenticationService {
             .build();
         try {
             userRepository.save(user);
+            return AuthCreateEstablishMentAdminResponseDto.builder()
+                .adminId(user.getId().toString())
+                .build();
         } catch (DataIntegrityViolationException e) {
             throw new AuthException(AuthError.ALREDY_EXIST_A_USER_WITH_THE_SAME_PHONE);
         } catch (ConstraintViolationException e) {

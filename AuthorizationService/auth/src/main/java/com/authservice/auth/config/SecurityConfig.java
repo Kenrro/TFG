@@ -29,8 +29,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").permitAll()
                 .requestMatchers("/demo/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/auth/register-employee").hasRole("ADMIN")
-                .requestMatchers("/api-key/**").hasRole("SERVICE")
+                .requestMatchers("/api-key/**").permitAll()
                 .anyRequest().authenticated()
             );
             httpSecurity.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

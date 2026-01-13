@@ -3,6 +3,7 @@ package com.authservice.auth.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.authservice.auth.dto.auth.AuthCreateEstablishMentAdminResponseDto;
 import com.authservice.auth.dto.auth.AuthLoginCustomerRequestDto;
 import com.authservice.auth.dto.auth.AuthLoginEmployeeRequestDto;
 import com.authservice.auth.dto.auth.AuthRegisterCustomerRequestDto;
@@ -51,6 +52,7 @@ public class AuthenticationController {
 
     
     // Customer Endpoints
+    // cualquier usuario puede registrarse como cliente
     @PostMapping("/register-customer")
     @Operation(
         summary = "Register a new customer",
@@ -212,12 +214,13 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<AuthResponseDto> postMethodName(@RequestBody @Valid AuthLoginEmployeeRequestDto request) {
+    public ResponseEntity<AuthResponseDto> loginEmployee(@RequestBody @Valid AuthLoginEmployeeRequestDto request) {
         return ResponseEntity.ok(authenticationService.loginEmployee(request));
     }
     
     // End Employee Endpoints
     // Admin Endpoints
+    @PreAuthorize("hasRole('SERVICE')")
     @PostMapping("/create-establishment-admin") // Is used to create the first admin of an establishment, called by the establishment service
     @Operation(
         summary = "Create establishment admin",
@@ -233,10 +236,11 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<Void> createEstablishmentAdmin(@RequestBody @Valid AuthRegisterEmployeeRequestDTO entity) {        
-        authenticationService.createEstablishmentAdmin(entity);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<AuthCreateEstablishMentAdminResponseDto> createEstablishmentAdmin(@RequestBody @Valid AuthRegisterEmployeeRequestDTO entity) {        
+        AuthCreateEstablishMentAdminResponseDto response = authenticationService.createEstablishmentAdmin(entity);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SERVICE')")
     @DeleteMapping("/delete-employee/{id}")
     @Operation(
         summary = "Delete an existing employee",
@@ -260,13 +264,6 @@ public class AuthenticationController {
         authenticationService.deleteEmployee(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-    @PostMapping("/test")
-    public String postMethodName(@RequestBody String entity) {
-        
-        return jwtUtil.generateServiceToken("auth-service");
-    }
-    
-    
     
     
     

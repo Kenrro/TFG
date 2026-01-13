@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 public enum Role {
     ADMIN("ADMIN", "Administrator", "Has full access to all resources"),
     SELLER("SELLER", "Seller", "Can manage own products and view sales data"),
-    CUSTOMER("CUSTOMER", "Customer", "Can browse products and make purchases")
+    CUSTOMER("CUSTOMER", "Customer", "Can browse products and make purchases"),
+    SERVICE("SERVICE", "Microservice", "Used for inter-service communication");
     ;
     private String code;
     private String displayName;

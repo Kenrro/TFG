@@ -1,11 +1,19 @@
 package com.authservice.auth.controller;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.authservice.auth.dto.microservice.MicroServiceAuthRequestDto;
+import com.authservice.auth.dto.microservice.MicroServiceAuthResponseDto;
+import com.authservice.auth.service.MicroServiceAuthService;
+
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 
@@ -13,11 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api-key")
 public class ApiKeyController {
     
-    @Value("${app.jwt.secret.public}")
-    private String publicKey;
+    @Autowired
+    private MicroServiceAuthService microServiceAuthService;
 
-    @PreAuthorize("hasRole('SERVICE')")
-    @GetMapping("/get-public-key")
+    @PostMapping("/get-public-key")
     @Operation(
         summary = "Get Public Key",
         description = "Endpoint to retrieve the public key for JWT verification.",
@@ -32,8 +39,9 @@ public class ApiKeyController {
             )
         }
     )
-    public String getPublicKey() {
-        return publicKey;
+    public ResponseEntity<MicroServiceAuthResponseDto> getPublicKey(@RequestBody @Valid MicroServiceAuthRequestDto request) {
+        MicroServiceAuthResponseDto response = microServiceAuthService.authenticationMicroService(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
     
     
