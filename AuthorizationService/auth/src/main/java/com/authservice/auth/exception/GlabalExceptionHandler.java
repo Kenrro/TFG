@@ -28,7 +28,7 @@ public class GlabalExceptionHandler extends ResponseEntityExceptionHandler {
     ) {
         ErrorDto errorDto = ErrorDto.builder()
             .timestamp(java.time.LocalDate.now())
-            .status(ex.getHttpStatus())
+            .status(String.valueOf(ex.getHttpStatus().value())) // como string numérico
             .message(ex.getMessage())
             .build();
         return ResponseEntity.status(ex.getHttpStatus()).body(errorDto);

@@ -18,7 +18,9 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.annotation.PostConstruct;
+import lombok.Data;
 
+@Data
 @Component
 public class JwtUtil {
     @Value("${app.jwt.secret.private}")
@@ -26,17 +28,22 @@ public class JwtUtil {
     @Value("${app.jwt.expiration-ms:86400000}")
     private long expirationMs;
     private PrivateKey privateKey;
+    private String serviceToken;
 
     @PostConstruct
     private void init() throws Exception {
         byte[] keyBytes = Base64.getDecoder().decode(
         secretStr
             .replaceAll("\\s+", "")   // elimina saltos y espacios
-    );
+        );
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory kf =KeyFactory.getInstance("RSA");
         this.privateKey = kf.generatePrivate(spec);
         
+    }
+    @PostConstruct
+    private void createServiceToken() {
+        this.serviceToken = generateServiceToken("AUTH_SERVICE");
     }
     // Generate token for service-to-service authentication
     public String generateServiceToken(String serviceName) {

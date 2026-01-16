@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class StablishmentRequestDto {
+public class StablishmentResponseDto {
     private String name;
-    private String address;
-    private String phone;
-    private String email;
     private String description;
+    private String address;
+    private String code;
 }

@@ -23,8 +23,8 @@ public class AuthLoginEmployeeRequestDto {
 
     @NotBlank(message = "Establishment code is required")
     @Pattern(
-        regexp = "^[A-Za-z0-9]{3,10}$",
-        message = "Invalid establishment code format"
+        regexp = "^[A-Z]{1,3}-\\d{4}$",
+        message = "Invalid establishment code format (expected: ABC-0001)"
     )
     private String establishmentCode;
 }

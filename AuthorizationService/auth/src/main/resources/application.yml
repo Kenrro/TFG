@@ -40,3 +40,6 @@ app:
 
   servicescredential:
     password: servicepass
+  microservices:
+    establishment-service-stablishment-url: http://localhost:8080/stablishments
+    establishment-service-userstablishment-url: http://localhost:8080/user-stablishments

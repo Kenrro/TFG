@@ -1,25 +1,23 @@
-package com.authservice.auth.exception;
+package com.stablishmentservice.stablishmentservice.exception;
 
 import org.springframework.http.HttpStatus;
 
-import com.authservice.auth.dto.errors.ErrorDto;
-import com.authservice.auth.enums.IError;
+import com.stablishmentservice.stablishmentservice.dto.errors.ErrorDto;
+import com.stablishmentservice.stablishmentservice.enums.IError;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper=false)
-public class AuthException extends RuntimeException {
+public class StablishmentGeneralException extends RuntimeException {
     private final String message;
     private final HttpStatus httpStatus;
     
-    public <T extends IError> AuthException(T error) {
+    public <T extends IError> StablishmentGeneralException(T error) {
         super(error.getMessage());
         this.httpStatus = error.getHttpStatus();
         this.message = error.getMessage();
     }   
-    public AuthException(ErrorDto errorDto) {
+    public StablishmentGeneralException(ErrorDto errorDto) {
         super(errorDto.getMessage());
         this.message = errorDto.getMessage();
       this.httpStatus = HttpStatus.resolve(parseStatus(errorDto.getStatus()));
@@ -40,4 +38,5 @@ public class AuthException extends RuntimeException {
             }
         }
     }
+
 }
