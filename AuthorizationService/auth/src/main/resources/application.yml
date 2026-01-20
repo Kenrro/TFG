@@ -5,7 +5,7 @@ server:
 
 spring:
   application:
-    name: email-service
+    name: Authorization-service
 
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1

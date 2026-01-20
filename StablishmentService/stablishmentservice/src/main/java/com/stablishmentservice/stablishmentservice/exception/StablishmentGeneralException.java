@@ -9,18 +9,21 @@ import lombok.Data;
 
 @Data
 public class StablishmentGeneralException extends RuntimeException {
+    private final String from;
     private final String message;
     private final HttpStatus httpStatus;
     
     public <T extends IError> StablishmentGeneralException(T error) {
         super(error.getMessage());
+        this.from = "Stablishment service";
         this.httpStatus = error.getHttpStatus();
         this.message = error.getMessage();
     }   
     public StablishmentGeneralException(ErrorDto errorDto) {
         super(errorDto.getMessage());
+        this.from = errorDto.getFrom();
         this.message = errorDto.getMessage();
-      this.httpStatus = HttpStatus.resolve(parseStatus(errorDto.getStatus()));
+        this.httpStatus = HttpStatus.resolve(parseStatus(errorDto.getStatus()));
     }
 
     // Método auxiliar para parsear

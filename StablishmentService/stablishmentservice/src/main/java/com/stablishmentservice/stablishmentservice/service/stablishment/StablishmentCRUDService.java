@@ -57,4 +57,7 @@ public class StablishmentCRUDService {
         Stablishment stablishment = findById(id);
         stablishmentRepository.delete(stablishment);
     }
+    public List<Stablishment> findByIds(List<Long> ids) {
+        return stablishmentRepository.findAllByIds(ids);
+    }
 }

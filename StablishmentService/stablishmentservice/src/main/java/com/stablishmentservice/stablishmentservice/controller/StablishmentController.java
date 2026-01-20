@@ -6,9 +6,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentAndAdminRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentAndAdminResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentRequestDto;
+import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentResponseDto;
 import com.stablishmentservice.stablishmentservice.entity.Stablishment;
 import com.stablishmentservice.stablishmentservice.service.stablishment.StablishmentService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -20,56 +25,134 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
 
 @RestController
 @RequestMapping("/stablishments")
 @RequiredArgsConstructor
+@Tag(name = "Establishment Controller", description = "Endpoints for managing establishments")
 public class StablishmentController {
 
     private final StablishmentService stablishmentService;
 
+    // =========================================================
+    // GET ALL ESTABLISHMENTS
+    // =========================================================
     @GetMapping
-    public ResponseEntity<List<Stablishment>> getMethodName() {
+    @Operation(
+        summary = "Get all establishments",
+        description = "Retrieve a list of all establishments.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "List of establishments retrieved successfully")
+        }
+    )
+    public ResponseEntity<List<Stablishment>> getAllStablishments() {
         return ResponseEntity.ok(stablishmentService.getAllStablishments());
     }
-    // Stablishment endpoints
+    // =========================================================
+    // CREATE ESTABLISHMENT
+    // =========================================================
     @PostMapping("/create-stablishment")
-    public ResponseEntity<StablishmentAndAdminResponseDto> createStablishment(@RequestBody StablishmentAndAdminRequestDto stablishmentAndAdminRequestDto) {
-        StablishmentAndAdminResponseDto response = stablishmentService.createStablishmentWithAdmin(stablishmentAndAdminRequestDto.getStablishment(), stablishmentAndAdminRequestDto.getAdminUser());
+    @Operation(
+        summary = "Create a new establishment",
+        description = "Create a new establishment along with its admin user.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Establishment created successfully")
+        }
+    )
+    public ResponseEntity<StablishmentAndAdminResponseDto> createStablishment(
+            @RequestBody @Parameter(description = "Establishment and admin user details") StablishmentAndAdminRequestDto stablishmentAndAdminRequestDto) {
+
+        StablishmentAndAdminResponseDto response = stablishmentService.createStablishmentWithAdmin(
+                stablishmentAndAdminRequestDto.getStablishment(),
+                stablishmentAndAdminRequestDto.getAdminUser()
+        );
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    // =========================================================
+    // UPDATE ESTABLISHMENT
+    // =========================================================
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update-stablishment/{id}")
-    public ResponseEntity<Void> putMethodName(@PathVariable Long id, @RequestBody StablishmentRequestDto body) {
+    @Operation(
+        summary = "Update an establishment",
+        description = "Update an existing establishment by ID. Requires ADMIN role.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Establishment updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Establishment not found")
+        }
+    )
+    public ResponseEntity<Void> updateStablishment(
+            @PathVariable @Parameter(description = "ID of the establishment") Long id,
+            @RequestBody @Parameter(description = "Updated establishment details") StablishmentRequestDto body) {
+
         stablishmentService.updateStablishment(body, id);
         return ResponseEntity.ok().build();
     }
+
+    // =========================================================
+    // DELETE ESTABLISHMENT
+    // =========================================================
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete-stablishment")
-    public ResponseEntity<Void> deleteStablishment() {
-        stablishmentService.deleteStablishment();
+    @Operation(
+        summary = "Delete an establishment",
+        description = "Delete an establishment using the authorization token. Requires ADMIN role.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Establishment deleted successfully"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - ADMIN role required")
+        }
+    )
+    public ResponseEntity<Void> deleteStablishment(
+            @RequestHeader("Authorization") @Parameter(description = "Bearer token for authentication") String authHeader) {
+
+        stablishmentService.deleteStablishment(authHeader);
         return ResponseEntity.ok().build();
     }
-    // TODO: create methods gets by different parameters
-    // Get stablishment code by user id
+
+    // =========================================================
+    // GET ESTABLISHMENT CODE BY USER ID
+    // =========================================================
+    @PreAuthorize("hasRole('SERVICE')")
     @GetMapping("/get-stablishment-code/{userId}")
-    public ResponseEntity<String> getStablishmentCodeByUserId(@PathVariable Long userId) {
+    @Operation(
+        summary = "Get establishment code by user ID",
+        description = "Retrieve the establishment code associated with a given user ID. Requires SERVICE role.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Establishment code retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "User or establishment not found"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - SERVICE role required")
+        }
+    )
+    public ResponseEntity<String> getStablishmentCodeByUserId(
+            @PathVariable @Parameter(description = "User ID") Long userId) {
+
         return ResponseEntity.ok(stablishmentService.getStablishmentCodeByUserId(userId));
     }
-    // @PreAuthorize("hasRole('ADMIN')")
-    // @GetMapping("/get-stablishment-by-token")
-    // public ResponseEntity<StablishmentRequestDto> getStablishmentByToken(@RequestParam String param) {
-        
-    // }
-    
-    
-    // necesitamos
-    // datos del establecimiento
-    // datos del usuario que lo crea
-    
-    
-    
 
+    // =========================================================
+    // GET ESTABLISHMENT(S) BY TOKEN
+    // =========================================================
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @GetMapping("/get-stablihsment-by-token")
+    @Operation(
+        summary = "Get establishments for the current user",
+        description = "Retrieve establishments associated with the current user from the token. Requires CUSTOMER role.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Establishments retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - CUSTOMER role required")
+        }
+    )
+    public ResponseEntity<List<StablishmentResponseDto>> getStablishmentByToken(
+            @RequestHeader("Authorization") @Parameter(description = "Bearer token for authentication") String authHeader) {
+
+        List<StablishmentResponseDto> stablishments = stablishmentService.getStablishmentsByToken(authHeader);
+        return ResponseEntity.ok(stablishments);
+    }
 }

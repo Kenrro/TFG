@@ -15,6 +15,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(StablishmentGeneralException.class)
     public ResponseEntity<ErrorDto> handleStablishmentGeneralException(StablishmentGeneralException ex) {
         ErrorDto errorDto = ErrorDto.builder()
+                .from(ex.getFrom())
                 .timestamp(LocalDate.now())
                 .status(String.valueOf(ex.getHttpStatus().value())) // como string numérico
                 .message(ex.getMessage())

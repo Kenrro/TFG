@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 
 import com.stablishmentservice.stablishmentservice.entity.Stablishment;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +20,7 @@ public interface StablishmentRepository extends JpaRepository<Stablishment, Long
 
     @Query("SELECT s FROM Stablishment s WHERE s.code = :code")
     Optional<Stablishment> findByCode(String code);
+
+    @Query("SELECT s FROM Stablishment s WHERE s.id IN :ids")
+    List<Stablishment> findAllByIds(@Param("ids") List<Long> ids);
 }

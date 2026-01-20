@@ -24,13 +24,25 @@ public interface UserStablishmentRepository extends JpaRepository<UserStablishme
     @Query("DELETE FROM UserStablishment u WHERE u.stablishmentId IN :stablishmentId")
     void deleteAllByStablishmentId(@Param("stablishmentId") Long stablishmentId);
 
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM UserStablishment u WHERE u.userId = :userId")
-    void deleteByUserId(@Param("userId") Long userId);
 
     @Query("SELECT us FROM UserStablishment us WHERE us.userId = :userId")
-    Optional<UserStablishment> findByUserId(@Param("userId") Long userId);
+    Optional<UserStablishment> findByEmployeeId(@Param("userId") Long userId);
+    @Query("SELECT us FROM UserStablishment us WHERE us.userId = :userId")
+    List<UserStablishment> findByUserId(@Param("userId") Long userId);
 
+    @Query("SELECT us FROM UserStablishment us WHERE us.stablishmentId = :stablishmentId")
+    List<UserStablishment> findByStablishmentId(@Param("stablishmentId") Long stablishmentId);
+
+    @Modifying
+    @Query("DELETE FROM UserStablishment us WHERE us.userId = :userId")
+    int deleteByUserId(@Param("userId") Long userId);
+    @Modifying
+    @Query("DELETE FROM UserStablishment us WHERE us.stablishmentId = :stablishmentId")
+    int deleteByStablishmentId(@Param("stablishmentId") Long stablishmentId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM UserStablishment us WHERE us.stablishmentId = :stablishmentId AND us.userId = :userId")
+    int deleteByUsertIdAndStablishmentId(@Param("userId") Long userId, @Param("stablishmentId") Long stablishmentId);
     
 } 

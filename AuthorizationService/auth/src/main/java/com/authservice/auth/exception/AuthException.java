@@ -11,18 +11,21 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper=false)
 public class AuthException extends RuntimeException {
+    private final String from;
     private final String message;
     private final HttpStatus httpStatus;
     
     public <T extends IError> AuthException(T error) {
         super(error.getMessage());
+        this.from = "Authentication service";
         this.httpStatus = error.getHttpStatus();
         this.message = error.getMessage();
     }   
     public AuthException(ErrorDto errorDto) {
         super(errorDto.getMessage());
+        this.from = errorDto.getFrom();
         this.message = errorDto.getMessage();
-      this.httpStatus = HttpStatus.resolve(parseStatus(errorDto.getStatus()));
+        this.httpStatus = HttpStatus.resolve(parseStatus(errorDto.getStatus()));
     }
 
     // Método auxiliar para parsear

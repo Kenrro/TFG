@@ -2,8 +2,6 @@ package com.stablishmentservice.stablishmentservice.jwt;
 
 import java.security.PublicKey;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -16,15 +14,18 @@ public class JwtUtil {
     private PublicKey publicKey;
     private String serviceToken;
     
-    public String getUserToken(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth != null) {
-            String token = (String) auth.getCredentials();
-            return token;
+    
+    private final String BEARER_PREFIX = "Bearer ";
+    public String cleanJwtToken(String tokenWithBearer) {
+        if (tokenWithBearer == null || tokenWithBearer.isEmpty()) {
+            throw new IllegalArgumentException("JWT token is null or empty");
         }
-        // TODO: Make this 
-        throw new RuntimeException("No token");
+
+        if (tokenWithBearer.startsWith(BEARER_PREFIX)) {
+            return tokenWithBearer.substring(BEARER_PREFIX.length());
+        }
+
+        return tokenWithBearer; // si ya estaba limpio
     }
     public Claims getClaims(String token) {
         return Jwts.parserBuilder()

@@ -83,7 +83,7 @@ public class UserService {
 
         // IDelete to db
         try {
-            userRepository.deleteByIds(request.getUserIds());
+            userRepository.deleteByIdsEmployees(request.getUserIds());
         } catch (DataAccessException e) {
             throw new AuthException(AuthError.DATABASE_ERROR);
         }

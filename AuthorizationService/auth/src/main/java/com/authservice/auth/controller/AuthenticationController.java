@@ -33,6 +33,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+
 
 
 @RestController
@@ -57,7 +61,14 @@ public class AuthenticationController {
 
     
     // Customer Endpoints
-    // cualquier usuario puede registrarse como cliente
+    @GetMapping("/get-user-id-by-username/{username}")
+    public ResponseEntity<Long> postMethodName(@PathVariable String username) {
+        Long id = authenticationCustomerService.getCustomerIdByUsername(username);
+        return ResponseEntity.ok(id);
+    }
+    
+    
+
     @PostMapping("/register-customer")
     @Operation(
         summary = "Register a new customer",

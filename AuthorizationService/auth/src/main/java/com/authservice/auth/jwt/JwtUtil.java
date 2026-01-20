@@ -83,6 +83,7 @@ public class JwtUtil {
     }
     private Map<String, Object> extraClaims(User user) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("id", user.getId());
         claims.put("role", user.getRole().name());
         claims.put("name", user.getName());
         claims.put("lastname", user.getLastname());

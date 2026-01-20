@@ -3,7 +3,6 @@ package com.authservice.auth.service.authentication;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import com.authservice.auth.dto.auth.AuthLoginCustomerRequestDto;
 import com.authservice.auth.dto.auth.AuthRegisterCustomerRequestDto;
@@ -21,7 +20,6 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,7 +40,6 @@ public class AuthenticationCustomerService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
-    @Qualifier("securedWebClient") private final WebClient securedWebClient;
     @Value("${app.microservices.establishment-service-userstablishment-url}")
     private String userStablishmentMicroServiceUrl;
     @Value("${app.microservices.establishment-service-stablishment-url}")
@@ -133,6 +130,9 @@ public class AuthenticationCustomerService {
         userService.deleteUser(
             userService.findByUsername(username).getId()
         );
+    }
+    public Long getCustomerIdByUsername(String username) {
+        return userService.findByUsername(username).getId();
     }
     
 }

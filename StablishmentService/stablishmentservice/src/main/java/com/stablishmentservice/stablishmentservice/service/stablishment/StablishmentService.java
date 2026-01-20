@@ -2,6 +2,7 @@ package com.stablishmentservice.stablishmentservice.service.stablishment;
 
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -11,13 +12,15 @@ import com.stablishmentservice.stablishmentservice.dto.authorization.DeleteUsers
 import com.stablishmentservice.stablishmentservice.dto.stablishment.AdminUserRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentAndAdminResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentRequestDto;
+import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentResponseDto;
 import com.stablishmentservice.stablishmentservice.entity.Stablishment;
+import com.stablishmentservice.stablishmentservice.entity.UserStablishment;
 import com.stablishmentservice.stablishmentservice.enums.StablishmentError;
 import com.stablishmentservice.stablishmentservice.exception.StablishmentGeneralException;
 import com.stablishmentservice.stablishmentservice.jwt.JwtUtil;
 import com.stablishmentservice.stablishmentservice.service.GeneratedRamdonCode;
-import com.stablishmentservice.stablishmentservice.service.UserStablishmentService;
 import com.stablishmentservice.stablishmentservice.service.WebClientService;
+import com.stablishmentservice.stablishmentservice.service.userStablishment.UserStablishmentService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -79,7 +82,6 @@ public class StablishmentService {
                 stablishment.getCode()
             );
         } catch (Exception e) {
-        // Manejar la compensación en caso de error
             if (adminId != null) {
                 // rollback created user in authservice
                 webClientService.secureDeleteMethod(
@@ -113,16 +115,16 @@ public class StablishmentService {
     //2. notify auth service to delete users
     //3. if success, delete stablishment and relations
     @Transactional
-    public void deleteStablishment() {
+    public void deleteStablishment(String token) {
         // get user token
-        String token = jwtUtil.getUserToken();
+        token = jwtUtil.cleanJwtToken(token);
         String stablishmentCode = jwtUtil.getClaim(token, "establishmentCode", String.class);
 
         // get stablishment id
         Long stablishmentId = stablishmentCRUDService.findByCode(stablishmentCode).getId();
         List<Long> usersIds = userStablishmentService.getAllUsersIdByStablishmentId(stablishmentId);
         // Remove all users who are registered at the establishment
-        DeleteUsersResponseDto deleteUsersResponseDto = webClientService.securePostMethod(authServiceUrl, 
+        DeleteUsersResponseDto deleteUsersResponseDto = webClientService.securePostMethod(authServiceUrl + "/delete-employees", 
             DeleteUsersInAuthServiceRequestDto.builder()
                 .userIds(usersIds)
                 .build(),
@@ -130,12 +132,23 @@ public class StablishmentService {
 
         try {
             stablishmentCRUDService.delete(stablishmentId);
+            userStablishmentService.deleteUserStablishmentRelationsByStablishmentId(stablishmentId);
         } catch (Exception e) {
             try {
                 // rollback deleted user
                 webClientService.securePostMethod(authServiceUrl + "/rollback-delete-employees",
                     deleteUsersResponseDto, 
                     Void.class);
+
+                userStablishmentService.rollbackDeleteStablishment(
+                    deleteUsersResponseDto.getDeletedUsers().stream().map(relation -> 
+                        UserStablishment.builder()
+                        .userId(relation.getId())
+                        .stablishmentId(stablishmentId)
+                        .build()      
+                    )
+                    .toList()
+                );
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -144,6 +157,20 @@ public class StablishmentService {
             );
         }
         
+    }
+    public List<StablishmentResponseDto> getStablishmentsByToken(String token) {
+        token = jwtUtil.cleanJwtToken(token);
+        Long userId = jwtUtil.getClaim(token, "id", Long.class);
+        List<Long> stablishmentsId = userStablishmentService.getStablishmentIdByUserId(userId);
+        return stablishmentCRUDService.findByIds(stablishmentsId).stream().map(stablishment ->
+            StablishmentResponseDto.builder()
+            .code(stablishment.getCode())
+            .name(stablishment.getName())
+            .description(stablishment.getDescription())
+            .address(stablishment.getAddress())
+            .build()   
+        ).toList();
+
     }
         
 }

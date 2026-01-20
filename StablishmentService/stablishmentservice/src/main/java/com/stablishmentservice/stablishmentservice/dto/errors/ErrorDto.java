@@ -2,14 +2,17 @@ package com.stablishmentservice.stablishmentservice.dto.errors;
 
 import java.time.LocalDate;
 
-import org.springframework.http.HttpStatus;
-
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ErrorDto {
+    private String from;
     private LocalDate timestamp;
     private String status;
     private String message;
