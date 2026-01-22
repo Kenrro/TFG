@@ -34,5 +34,5 @@ public class SecurityConfig {
             );
             httpSecurity.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
             return httpSecurity.build();
-    }
+    } 
 }

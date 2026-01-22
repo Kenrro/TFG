@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
 spring:
   web:
     error:
@@ -25,5 +25,4 @@ app:
         password: servicepass
         apiUrl: http://localhost:8081/api-key/get-public-key
         authServiceUrl: http://localhost:8081/api/auth/
-        productServiceUrl: http://localhost:8083/products
-    
+        establishment-service-stablishment-url: http://localhost:8080/stablishments

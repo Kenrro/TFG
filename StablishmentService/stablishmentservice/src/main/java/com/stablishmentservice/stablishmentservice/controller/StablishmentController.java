@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
+
 @RestController
 @RequestMapping("/stablishments")
 @RequiredArgsConstructor
@@ -155,4 +156,13 @@ public class StablishmentController {
         List<StablishmentResponseDto> stablishments = stablishmentService.getStablishmentsByToken(authHeader);
         return ResponseEntity.ok(stablishments);
     }
+    // =========================================================
+    // GET ESTABLISHMENT(S) BY CODE
+    // =========================================================
+    @GetMapping("/get-stablishment-by-code/{code}")
+    public ResponseEntity<StablishmentResponseDto> getStablishmentByCode(@PathVariable String code) {
+        StablishmentResponseDto response = stablishmentService.getStablishmentByCode(code);
+        return ResponseEntity.ok(response);
+    }
+    
 }

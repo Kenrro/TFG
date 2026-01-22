@@ -22,7 +22,9 @@ public enum StablishmentError implements IError {
     
     // Validación
     INVALID_STABLISHMENT_DATA(HttpStatus.BAD_REQUEST, "Invalid establishment data"),
-    INVALID_ADMIN_DATA(HttpStatus.BAD_REQUEST, "Invalid admin data");
+    INVALID_ADMIN_DATA(HttpStatus.BAD_REQUEST, "Invalid admin data"), 
+    SERVICE_COMMUNICATION_FAILED(HttpStatus.BAD_GATEWAY, "Failed to communicate with external service"),
+    UNEXPECTED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
 
     private final String message;
     private final HttpStatus httpStatus;

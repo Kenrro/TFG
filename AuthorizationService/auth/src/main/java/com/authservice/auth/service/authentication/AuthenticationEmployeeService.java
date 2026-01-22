@@ -138,6 +138,12 @@ public class AuthenticationEmployeeService {
                 String.class,
                 adminId);
         }
+        private String getEstablishmentCode(Long id) {
+            return webClientService.secureGetMethod(
+                stablishmentMicroServiceUrl + "/get-stablishment-code/{userId}",
+                String.class,
+                id);
+        }
        
 
     public AuthCreateEstablishMentAdminResponseDto createEstablishmentAdmin(AuthRegisterEmployeeRequestDTO request) {
@@ -155,6 +161,7 @@ public class AuthenticationEmployeeService {
     }
     public AuthResponseDto loginEmployee(AuthLoginEmployeeRequestDto request) {
         User user;
+        String code;
         try {
             Authentication auth = authenticationManager.authenticate(
                 new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
@@ -163,6 +170,10 @@ public class AuthenticationEmployeeService {
                 )
             );
             user = (User) auth.getPrincipal();
+            code = getEstablishmentCode(user.getId());
+            if (!code.equals(request.getEstablishmentCode())) {
+                throw new AuthException(AuthError.ACCESS_DENIED);
+            }
         } catch (BadCredentialsException | UsernameNotFoundException e) {
             e.printStackTrace();
             throw new AuthException(AuthError.INVALID_CREDENTIALS);
@@ -170,7 +181,7 @@ public class AuthenticationEmployeeService {
             throw new AuthException(AuthError.DATABASE_ERROR);
         } 
         
-        return generateTokenForUser(user, request.getEstablishmentCode());
+        return generateTokenForUser(user, code);
     }
 
     @Transactional

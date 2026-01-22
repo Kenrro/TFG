@@ -1,4 +1,4 @@
-package com.stablishmentservice.stablishmentservice.service;
+package com.productservice.productsservice.service;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.stablishmentservice.stablishmentservice.dto.errors.ErrorDto;
-import com.stablishmentservice.stablishmentservice.enums.StablishmentError;
-import com.stablishmentservice.stablishmentservice.exception.StablishmentGeneralException;
+import com.productservice.productsservice.dto.errors.ErrorDto;
+import com.productservice.productsservice.enums.ProductError;
+import com.productservice.productsservice.exception.ProductGeneralException;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class WebClientService {
+
     @Qualifier("securedWebClient") private final WebClient securedWebClient;
 
     public <T> T secureGetMethod(String uri, Class<T> responseType, Object... uriVariables) {
@@ -26,19 +27,19 @@ public class WebClientService {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                     response.bodyToMono(ErrorDto.class)
-                            .flatMap(errorBody -> Mono.error(new StablishmentGeneralException(errorBody)))
+                            .flatMap(errorBody -> Mono.error(new ProductGeneralException(errorBody)))
                 )
                 .bodyToMono(responseType)
                 .block();
 
-        } catch (StablishmentGeneralException ex) {
+        } catch (ProductGeneralException ex) {
             throw ex;
         } catch (WebClientResponseException ex) {
-            throw new StablishmentGeneralException(
-                StablishmentError.SERVICE_COMMUNICATION_FAILED);
+            throw new ProductGeneralException(
+                ProductError.SERVICE_COMMUNICATION_FAILED);
         } catch (Exception ex) {
-            throw new StablishmentGeneralException(
-                StablishmentError.UNEXPECTED_ERROR);
+            throw new ProductGeneralException(
+                ProductError.UNEXPECTED_ERROR);
         }
     }
 
@@ -51,19 +52,19 @@ public class WebClientService {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                     response.bodyToMono(ErrorDto.class)
-                            .flatMap(errorBody -> Mono.error(new StablishmentGeneralException(errorBody)))
+                            .flatMap(errorBody -> Mono.error(new ProductGeneralException(errorBody)))
                 )
                 .bodyToMono(responseType)
                 .block();
 
-        } catch (StablishmentGeneralException ex) {
+        } catch (ProductGeneralException ex) {
             throw ex;
         } catch (WebClientResponseException ex) {
-            throw new StablishmentGeneralException(
-                StablishmentError.SERVICE_COMMUNICATION_FAILED);
+            throw new ProductGeneralException(
+                ProductError.SERVICE_COMMUNICATION_FAILED);
         } catch (Exception ex) {
-            throw new StablishmentGeneralException(
-                StablishmentError.UNEXPECTED_ERROR);
+            throw new ProductGeneralException(
+                ProductError.UNEXPECTED_ERROR);
         }
     }
 
@@ -75,20 +76,19 @@ public class WebClientService {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                     response.bodyToMono(ErrorDto.class)
-                            .flatMap(errorBody -> Mono.error(new StablishmentGeneralException(errorBody)))
+                            .flatMap(errorBody -> Mono.error(new ProductGeneralException(errorBody)))
                 )
                 .bodyToMono(responseType)
                 .block();
 
-        } catch (StablishmentGeneralException ex) {
+        } catch (ProductGeneralException ex) {
             throw ex;
         } catch (WebClientResponseException ex) {
-            throw new StablishmentGeneralException(
-                StablishmentError.SERVICE_COMMUNICATION_FAILED);
+            throw new ProductGeneralException(
+                ProductError.SERVICE_COMMUNICATION_FAILED);
         } catch (Exception ex) {
-            throw new StablishmentGeneralException(
-                StablishmentError.UNEXPECTED_ERROR );
+            throw new ProductGeneralException(
+                ProductError.UNEXPECTED_ERROR );
         }
     }
-
 }

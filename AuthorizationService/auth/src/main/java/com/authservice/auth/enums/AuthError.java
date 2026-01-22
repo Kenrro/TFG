@@ -18,7 +18,9 @@ public enum AuthError implements IError {
     INVALID_ROLE_UPDATE_CUSTOMER(HttpStatus.BAD_REQUEST, "Invalid role for customer update."), 
     ERROR_UPDATING_CUSTOMER(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating the customer."),
     ERROR_UPDATING_EMPLOYEE(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating the employee."),
-    ERROR_ASOSCIATING_EMPLOYEE_ESTABLISHMENT(HttpStatus.INTERNAL_SERVER_ERROR, "Error associating employee to establishment.")
+    ERROR_ASOSCIATING_EMPLOYEE_ESTABLISHMENT(HttpStatus.INTERNAL_SERVER_ERROR, "Error associating employee to establishment."),
+    SERVICE_COMMUNICATION_FAILED(HttpStatus.BAD_GATEWAY, "Failed to communicate with external service"),
+    UNEXPECTED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
     ;
 
     private final String message;
