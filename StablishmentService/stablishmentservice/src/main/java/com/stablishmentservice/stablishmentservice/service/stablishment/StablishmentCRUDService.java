@@ -43,8 +43,8 @@ public class StablishmentCRUDService {
         return stablishmentRepository.save(stablishment);
     }
 
-    public Stablishment update(Long id, StablishmentRequestDto dto) {
-        Stablishment stablishment = findById(id);
+    public Stablishment update(String code, StablishmentRequestDto dto) {
+        Stablishment stablishment = findByCode(code);
 
         stablishment.setName(dto.getName());
         stablishment.setAddress(dto.getAddress());

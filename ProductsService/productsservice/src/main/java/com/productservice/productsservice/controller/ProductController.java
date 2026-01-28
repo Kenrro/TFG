@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.productservice.productsservice.dto.products.DeletedProductsResponseDto;
 import com.productservice.productsservice.dto.products.ProductCreateRequestDto;
 import com.productservice.productsservice.dto.products.ProductResponsetDto;
+import com.productservice.productsservice.dto.products.ProductsResponseDto;
 import com.productservice.productsservice.service.product.ProductService;
 
 import lombok.RequiredArgsConstructor;
@@ -67,7 +68,16 @@ public class ProductController {
     public ResponseEntity<List<ProductResponsetDto>> getAllByStablishmentCode(@PathVariable String code) {
         return ResponseEntity.ok(productService.getAllProductsByCode(code));
     }
-
+    // @PreAuthorize("hasAuthority('SERVICE')")
+    @PostMapping("/get-all-by-ids")
+    public ResponseEntity<ProductsResponseDto> getProductsByIds(
+        @RequestBody List<Long> ids
+    ) {
+        ProductsResponseDto products = ProductsResponseDto.builder()
+        .products(productService.getAllProductsByIds(ids))
+        .build();
+        return ResponseEntity.ok(products);
+    }
     /**
      * Create a new product.
      * Only accessible by ADMIN.

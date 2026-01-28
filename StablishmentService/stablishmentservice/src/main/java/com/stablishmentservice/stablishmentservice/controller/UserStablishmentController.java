@@ -37,7 +37,8 @@ public class UserStablishmentController {
     // =========================================================
     // CREATE USER ↔ ESTABLISHMENT RELATION
     // =========================================================
-    @PostMapping("/add-relation-user-stablishment")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @PostMapping("/add-relation-customer-stablishment")
     @Operation(
         summary = "Add relation between user and establishment",
         description = "Creates a relation between a user and an establishment.",
@@ -45,10 +46,30 @@ public class UserStablishmentController {
             @ApiResponse(responseCode = "200", description = "Relation created successfully")
         }
     )
-    public ResponseEntity<Void> addRelationUserWithStablishment(
+    public ResponseEntity<Void> addRelationCustomeWithStablishment(
+            @RequestBody @Parameter(description = "User ID and establishment code") AddRelationUserWithStablishmentRequestDto requestDto,
+            @RequestHeader("Authorization") String token
+        ) {
+
+        userStablishmentService.createUserCustomerStablishmentRelation(
+                token,
+                requestDto.getStablishmentCode()
+        );
+        return ResponseEntity.ok().build();
+    }
+    // for create employees
+    @PostMapping("/add-relation-employee-stablishment")
+    @Operation(
+        summary = "Add relation between user and establishment",
+        description = "Creates a relation between a user and an establishment.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Relation created successfully")
+        }
+    )
+    public ResponseEntity<Void> addRelationEmployeeWithStablishment(
             @RequestBody @Parameter(description = "User ID and establishment code") AddRelationUserWithStablishmentRequestDto requestDto) {
 
-        userStablishmentService.createUserStablishmentRelation(
+        userStablishmentService.createUserEmployeeStablishmentRelation(
                 requestDto.getUserId(),
                 requestDto.getStablishmentCode()
         );
@@ -71,7 +92,7 @@ public class UserStablishmentController {
     public ResponseEntity<Void> deleteRelationsByStablishment(
             @PathVariable @Parameter(description = "ID of the user") Long userId) {
 
-        userStablishmentService.deleteUserStablishmentRelations(userId);
+        userStablishmentService.deleteEmployeeStablishmentRelations(userId);
         return ResponseEntity.ok().build();
     }
 
@@ -99,24 +120,7 @@ public class UserStablishmentController {
     // =========================================================
     // CREATE CUSTOMER ↔ ESTABLISHMENT RELATION (CUSTOMER)
     // =========================================================
-    @PreAuthorize("hasRole('CUSTOMER')")
-    @PostMapping("/create-customer-relation")
-    @Operation(
-        summary = "Create customer relation",
-        description = "Creates a relation between the current customer and an establishment. Requires CUSTOMER role.",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Customer relation created successfully"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - CUSTOMER role required")
-        }
-    )
-    public ResponseEntity<Void> createCustomerRelation(
-            @RequestBody @Parameter(description = "Customer relation request data") UserStablishmentCreateCustomerRelationRequestDto request,
-            @RequestHeader("Authorization") @Parameter(description = "Bearer token") String authHeader) {
-
-        userStablishmentService.createCustomerRelation(request, authHeader);
-        return ResponseEntity.ok().build();
-    }
-
+  
     // =========================================================
     // DELETE CUSTOMER ↔ ESTABLISHMENT RELATION (CUSTOMER)
     // =========================================================

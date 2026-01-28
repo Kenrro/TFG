@@ -10,6 +10,7 @@ import com.authservice.auth.dto.auth.AuthLoginEmployeeRequestDto;
 import com.authservice.auth.dto.auth.AuthRegisterEmployeeRequestDTO;
 import com.authservice.auth.dto.auth.AuthResponseDto;
 import com.authservice.auth.dto.auth.AuthUpdateCustomerRequestDto;
+import com.authservice.auth.dto.auth.UserDto;
 import com.authservice.auth.dto.stablisment.CreateRelationUserWithStablishmentRequestDto;
 import com.authservice.auth.dto.stablisment.DeleteUsersInAuthServiceRequestDto;
 import com.authservice.auth.dto.stablisment.DeleteUsersInAuthServiceResponseDto;
@@ -209,11 +210,25 @@ public class AuthenticationEmployeeService {
     }
     @Transactional
     public DeleteUsersInAuthServiceResponseDto deleteEmployees(DeleteUsersInAuthServiceRequestDto request) {
-        return userService.deleteEmployees(request);
+        List<UserDto> deletedUsers = userService.deleteEmployees(request).stream()
+            .map(user -> UserDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .lastname(user.getLastname())
+                .username(user.getUsername())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .build())
+            .toList();
+        // return response
+        return DeleteUsersInAuthServiceResponseDto.builder()
+            .deletedUsers(deletedUsers)
+            .build();
     }
     public void rollbackDeleteEmployees(RollbackDeleteEmployeesRequestDto request) {
         List<User> users = request.getEmployees().stream().map(dto ->  
             User.builder()
+                .id(dto.getId())
                 .name(dto.getName())
                 .lastname(dto.getLastname())
                 .username(dto.getUsername())

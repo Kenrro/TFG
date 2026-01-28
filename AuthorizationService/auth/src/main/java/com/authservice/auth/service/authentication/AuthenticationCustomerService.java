@@ -44,6 +44,8 @@ public class AuthenticationCustomerService {
     private String userStablishmentMicroServiceUrl;
     @Value("${app.microservices.establishment-service-stablishment-url}")
     private String stablishmentMicroServiceUrl;
+    @Value("${app.microservices.incentives-service-url}")
+    private String incentiveService;
 
         // Generate token for user with optional establishment code
         private AuthResponseDto generateTokenForUser(User user, String establishmentCode) {
@@ -79,11 +81,20 @@ public class AuthenticationCustomerService {
             .lastname(param.getLastname())
             .role(Role.CUSTOMER)
             .build();
-        user = userService.createUser(user);
+        
+        try {
+            
+            user = userService.createUser(user);
+            // TODO: las carteras se crean al unir al usuario al negocio
+        } catch(AuthException e) {
+            throw e;
+        }
         return generateTokenForUser(user, null);
     } 
     @Transactional
-    public void updateCustomer(Long id, AuthUpdateCustomerRequestDto request) {
+    public void updateCustomer(String token, AuthUpdateCustomerRequestDto request) {
+        token = jwtUtil.cleanJwtToken(token);
+        Long id = jwtUtil.getClaim(token, "id", Long.class);
         User user = userRepository.findById(id)
         .orElseThrow(() -> new AuthException(AuthError.USER_NOT_FOUND));
         if (user.getRole() != null && user.getRole() != Role.CUSTOMER) {

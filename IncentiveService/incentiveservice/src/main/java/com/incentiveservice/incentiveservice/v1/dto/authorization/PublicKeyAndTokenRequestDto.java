@@ -1,0 +1,13 @@
+package com.incentiveservice.incentiveservice.v1.dto.authorization;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+@Builder
+public class PublicKeyAndTokenRequestDto {
+    String microserviceName;
+    String password;
+}

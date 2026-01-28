@@ -57,6 +57,21 @@ public class JwtUtil {
             .signWith(privateKey, SignatureAlgorithm.RS256)
             .compact();
     }
+    private final String BEARER_PREFIX = "Bearer ";
+    public String cleanJwtToken(String tokenWithBearer) {
+        if (tokenWithBearer == null || tokenWithBearer.isEmpty()) {
+            throw new IllegalArgumentException("JWT token is null or empty");
+        }
+
+        if (tokenWithBearer.startsWith(BEARER_PREFIX)) {
+            return tokenWithBearer.substring(BEARER_PREFIX.length());
+        }
+
+        return tokenWithBearer; // si ya estaba limpio
+    }
+    public <T> T getClaim(String token, String claimName, Class<T> clazz) {
+        return getClaims(token).get(claimName, clazz);
+    }
     public String generateToken(User user) {
         Date now = new Date();
         Date exp = new Date(System.currentTimeMillis() + expirationMs);

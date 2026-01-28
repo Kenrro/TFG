@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,7 +35,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -62,7 +62,9 @@ public class AuthenticationController {
     
     // Customer Endpoints
     @GetMapping("/get-user-id-by-username/{username}")
-    public ResponseEntity<Long> postMethodName(@PathVariable String username) {
+    public ResponseEntity<Long> postMethodName(
+        @PathVariable String username
+    ) {
         Long id = authenticationCustomerService.getCustomerIdByUsername(username);
         return ResponseEntity.ok(id);
     }
@@ -84,7 +86,9 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<AuthResponseDto> registerCustomer(@RequestBody @Valid AuthRegisterCustomerRequestDto request) {
+    public ResponseEntity<AuthResponseDto> registerCustomer(
+        @RequestBody @Valid AuthRegisterCustomerRequestDto request
+    ) {
         authenticationCustomerService.registerCustomer(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -104,11 +108,13 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<AuthResponseDto> loginCustomer(@RequestBody @Valid AuthLoginCustomerRequestDto entity) {
+    public ResponseEntity<AuthResponseDto> loginCustomer(
+        @RequestBody @Valid AuthLoginCustomerRequestDto entity
+    ) {
         return ResponseEntity.ok(authenticationCustomerService.loginCustomer(entity));
     }
 
-    @PutMapping("/update-customer/{id}")
+    @PutMapping("/update-customer")
     @Operation(
 
         summary = "Update an existing customer",
@@ -128,8 +134,10 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<Void> updateCustomer(@PathVariable Long id, @RequestBody @Valid AuthUpdateCustomerRequestDto entity) {
-        authenticationCustomerService.updateCustomer(id, entity);
+    public ResponseEntity<Void> updateCustomer(
+        @RequestHeader("Authorization") String token, 
+        @RequestBody @Valid AuthUpdateCustomerRequestDto entity) {
+        authenticationCustomerService.updateCustomer(token, entity);
         
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -177,7 +185,9 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<Void> registerSeller(@RequestBody @Valid AuthRegisterEmployeeRequestDTO request) {
+    public ResponseEntity<Void> registerSeller(
+        @RequestBody @Valid AuthRegisterEmployeeRequestDTO request
+    ) {
         authenticationEmployeeService.registerEmployee(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -230,7 +240,9 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<AuthResponseDto> loginEmployee(@RequestBody @Valid AuthLoginEmployeeRequestDto request) {
+    public ResponseEntity<AuthResponseDto> loginEmployee(
+        @RequestBody @Valid AuthLoginEmployeeRequestDto request
+    ) {
         return ResponseEntity.ok(authenticationEmployeeService.loginEmployee(request));
     }
     
@@ -252,7 +264,9 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<AuthCreateEstablishMentAdminResponseDto> createEstablishmentAdmin(@RequestBody @Valid AuthRegisterEmployeeRequestDTO entity) {        
+    public ResponseEntity<AuthCreateEstablishMentAdminResponseDto> createEstablishmentAdmin(
+        @RequestBody @Valid AuthRegisterEmployeeRequestDTO entity
+    ) {        
         AuthCreateEstablishMentAdminResponseDto response = authenticationEmployeeService.createEstablishmentAdmin(entity);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -276,7 +290,9 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteEmployee(
+        @PathVariable Long id
+    ) {
         authenticationEmployeeService.deleteEmployee(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -296,7 +312,9 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<DeleteUsersInAuthServiceResponseDto> deleteEmployees(@RequestBody DeleteUsersInAuthServiceRequestDto request) {
+    public ResponseEntity<DeleteUsersInAuthServiceResponseDto> deleteEmployees(
+        @RequestBody DeleteUsersInAuthServiceRequestDto request
+    ) {
         DeleteUsersInAuthServiceResponseDto response = authenticationEmployeeService.deleteEmployees(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -316,7 +334,9 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<Void> rollbackDeleteEmployees(@RequestBody RollbackDeleteEmployeesRequestDto request) {
+    public ResponseEntity<Void> rollbackDeleteEmployees(
+        @RequestBody RollbackDeleteEmployeesRequestDto request
+    ) {
         authenticationEmployeeService.rollbackDeleteEmployees(request);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

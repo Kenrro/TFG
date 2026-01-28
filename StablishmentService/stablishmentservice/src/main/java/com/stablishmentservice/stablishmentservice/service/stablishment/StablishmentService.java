@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.stablishmentservice.stablishmentservice.dto.authorization.CreateStablishmentUserResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.authorization.DeleteUsersInAuthServiceRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.authorization.DeleteUsersResponseDto;
+import com.stablishmentservice.stablishmentservice.dto.incentive.configuration.StablishmentConfigurationCreateRequestDto;
+import com.stablishmentservice.stablishmentservice.dto.incentive.configuration.StablishmentConfigurationResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.products.DeletedProductsResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.AdminUserRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentAndAdminResponseDto;
@@ -39,6 +41,8 @@ public class StablishmentService {
     private String authServiceUrl;
     @Value("${app.servicescredential.productServiceUrl}")
     private String productServiceUrl;
+    @Value("${app.servicescredential.incentive-service-stablishment-configuration-url}")
+    private String configurationServiceUrl;
 
     // =========================================================
     // GET METHODS
@@ -76,6 +80,7 @@ public class StablishmentService {
             String code = GeneratedRamdonCode.generateUniqueCode(stablishmentDto.getName());
             Stablishment stablishment = null;
             Long adminId = null;
+            StablishmentConfigurationResponseDto configuration = null;
         
         stablishment = stablishmentCRUDService.create(Stablishment.builder()
         .name(stablishmentDto.getName())
@@ -90,9 +95,17 @@ public class StablishmentService {
                 admin, 
                 CreateStablishmentUserResponseDto.class);           
             adminId = response.getAdminId();
-
+            // Create configuration
+            StablishmentConfigurationCreateRequestDto request = StablishmentConfigurationCreateRequestDto.builder()
+            .stablishmentCode(code)
+            .pointsPerEuro(10)
+            .build();
+            configuration = webClientService.securePostMethod(
+                configurationServiceUrl, 
+                request, 
+                StablishmentConfigurationResponseDto.class);
             // Crear relación entre usuario y establecimiento
-            userStablishmentService.createUserStablishmentRelation(
+            userStablishmentService.createUserEmployeeStablishmentRelation(
                 adminId, 
                 stablishment.getCode()
             );
@@ -108,6 +121,13 @@ public class StablishmentService {
                 // Delete created stablishment
                 stablishmentCRUDService.delete(stablishment.getId());
             }
+
+            if (configuration != null) {
+                webClientService.secureDeleteMethod(
+                    configurationServiceUrl + "/{stablishmentCode}", 
+                    Void.class, 
+                    code);
+            }
             throw new StablishmentGeneralException(StablishmentError.STABLISHMENT_CREATION_FAILED);
         }
 
@@ -121,9 +141,10 @@ public class StablishmentService {
     }
 
     @Transactional
-    public void updateStablishment(StablishmentRequestDto stablishmentDto, Long id) {
-        stablishmentCRUDService.update(id, stablishmentDto);
-        
+    public void updateStablishment(StablishmentRequestDto stablishmentDto, String token) {
+        token = jwtUtil.cleanJwtToken(token);
+        String code = jwtUtil.getClaim(token, "establishmentCode", String.class);
+        stablishmentCRUDService.update(code, stablishmentDto);
     }
     // =========================================================
     // DELETE ESTABLISHMENT WITH SAGA PATTERN
@@ -136,33 +157,45 @@ public class StablishmentService {
         // get user token
         token = jwtUtil.cleanJwtToken(token);
         String stablishmentCode = jwtUtil.getClaim(token, "establishmentCode", String.class);
-
+        DeletedProductsResponseDto deletedProducts = null;
+        DeleteUsersResponseDto deleteUsersResponseDto = null;
         // get stablishment id
         Long stablishmentId = stablishmentCRUDService.findByCode(stablishmentCode).getId();
         List<Long> usersIds = userStablishmentService.getAllUsersIdByStablishmentId(stablishmentId);
-        // Remove all users who are registered at the establishment
-        DeleteUsersResponseDto deleteUsersResponseDto = webClientService.securePostMethod(authServiceUrl + "/delete-employees", 
-            DeleteUsersInAuthServiceRequestDto.builder()
-                .userIds(usersIds)
-                .build(),
-                DeleteUsersResponseDto.class);
-        // Remove all productos from products service
-        DeletedProductsResponseDto deletedProducts = webClientService.secureDeleteMethod(
-            productServiceUrl + "/delete-by-code/{code}",
-            DeletedProductsResponseDto.class ,
-            stablishmentCode);
-
         try {
-            stablishmentCRUDService.delete(stablishmentId);
+            // Remove all users who are registered at the establishment
+            deleteUsersResponseDto = webClientService.securePostMethod(authServiceUrl + "/delete-employees", 
+                DeleteUsersInAuthServiceRequestDto.builder()
+                    .userIds(usersIds)
+                    .build(),
+                    DeleteUsersResponseDto.class);
+                deleteUsersResponseDto.getDeletedUsers().stream().forEach(delete -> System.out.println("Entra"));
+                deleteUsersResponseDto.getDeletedUsers().stream().forEach(delete -> System.out.println(delete.getId()+" "+delete.getName()+" "+delete.getRole()+" "+delete.getLastname()+" "+delete.getLastname()));
+                deleteUsersResponseDto.getDeletedUsers().stream().forEach(delete -> System.out.println("Sale"));
+            // Remove all productos from products service
+            deletedProducts = webClientService.secureDeleteMethod(
+                productServiceUrl + "/delete-by-code/{code}",
+                DeletedProductsResponseDto.class ,
+                stablishmentCode);
+            webClientService.secureDeleteMethod(
+                        configurationServiceUrl + "/{stablishmentCode}", 
+                        Void.class, 
+                        stablishmentCode);
+
+        
             userStablishmentService.deleteUserStablishmentRelationsByStablishmentId(stablishmentId);
+            stablishmentCRUDService.delete(stablishmentId);
         } catch (Exception e) {
             try {
                 // rollback deleted user
-                webClientService.securePostMethod(authServiceUrl + "/rollback-delete-employees",
-                    deleteUsersResponseDto, 
-                    Void.class);
+                if (deleteUsersResponseDto != null) {
+                    webClientService.securePostMethod(authServiceUrl + "/rollback-delete-employees",
+                        deleteUsersResponseDto, 
+                        Void.class);
+                }
                 // rollback deleted relations
-                userStablishmentService.rollbackDeleteStablishment(
+                if (deleteUsersResponseDto != null) {
+                    userStablishmentService.rollbackDeleteStablishment(
                     deleteUsersResponseDto.getDeletedUsers().stream().map(relation -> 
                         UserStablishment.builder()
                         .userId(relation.getId())
@@ -170,11 +203,15 @@ public class StablishmentService {
                         .build()      
                     )
                     .toList()
-                );
+                    );
+                }
                 // rollback deleted products
-                webClientService.securePostMethod(productServiceUrl + "/rollback-deleted-products", 
-                deletedProducts, 
-                Void.class);
+                if (deletedProducts != null) {    
+                
+                    webClientService.securePostMethod(productServiceUrl + "/rollback-deleted-products", 
+                    deletedProducts, 
+                    Void.class);
+                }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

@@ -26,3 +26,4 @@ app:
         apiUrl: http://localhost:8081/api-key/get-public-key
         authServiceUrl: http://localhost:8081/api/auth/
         establishment-service-stablishment-url: http://localhost:8080/stablishments
+        incentive-service-incentive-url: http://localhost:8083/v1/incentives

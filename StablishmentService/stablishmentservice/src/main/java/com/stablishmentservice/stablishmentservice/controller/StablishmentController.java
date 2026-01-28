@@ -50,13 +50,14 @@ public class StablishmentController {
             @ApiResponse(responseCode = "200", description = "List of establishments retrieved successfully")
         }
     )
+    
     public ResponseEntity<List<Stablishment>> getAllStablishments() {
         return ResponseEntity.ok(stablishmentService.getAllStablishments());
     }
     // =========================================================
     // CREATE ESTABLISHMENT
     // =========================================================
-    @PostMapping("/create-stablishment")
+    @PostMapping
     @Operation(
         summary = "Create a new establishment",
         description = "Create a new establishment along with its admin user.",
@@ -79,7 +80,7 @@ public class StablishmentController {
     // UPDATE ESTABLISHMENT
     // =========================================================
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/update-stablishment/{id}")
+    @PutMapping
     @Operation(
         summary = "Update an establishment",
         description = "Update an existing establishment by ID. Requires ADMIN role.",
@@ -89,10 +90,10 @@ public class StablishmentController {
         }
     )
     public ResponseEntity<Void> updateStablishment(
-            @PathVariable @Parameter(description = "ID of the establishment") Long id,
+            @RequestHeader("Authorization") String token,
             @RequestBody @Parameter(description = "Updated establishment details") StablishmentRequestDto body) {
 
-        stablishmentService.updateStablishment(body, id);
+        stablishmentService.updateStablishment(body, token);
         return ResponseEntity.ok().build();
     }
 
@@ -100,7 +101,7 @@ public class StablishmentController {
     // DELETE ESTABLISHMENT
     // =========================================================
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/delete-stablishment")
+    @DeleteMapping
     @Operation(
         summary = "Delete an establishment",
         description = "Delete an establishment using the authorization token. Requires ADMIN role.",

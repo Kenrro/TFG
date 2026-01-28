@@ -66,22 +66,11 @@ public class UserService {
         }
     }
     @Transactional
-    public DeleteUsersInAuthServiceResponseDto deleteEmployees(DeleteUsersInAuthServiceRequestDto request) {
+    public List<User> deleteEmployees(DeleteUsersInAuthServiceRequestDto request) {
         // get users
         List<User> users = userRepository.findAllByIds(request.getUserIds());
 
-        // Build users to Dto
-        List<UserDto> deletedUsers = users.stream()
-            .map(user -> UserDto.builder()
-                .name(user.getName())
-                .lastname(user.getLastname())
-                .username(user.getUsername())
-                .role(user.getRole())
-                .createdAt(user.getCreatedAt())
-                .build())
-            .toList();
-
-        // IDelete to db
+       
         try {
             userRepository.deleteByIdsEmployees(request.getUserIds());
         } catch (DataAccessException e) {
@@ -89,9 +78,7 @@ public class UserService {
         }
 
         // return response
-        return DeleteUsersInAuthServiceResponseDto.builder()
-            .deletedUsers(deletedUsers)
-            .build();
+        return users;
     }
 
     public void saveAll(List<User> users) {

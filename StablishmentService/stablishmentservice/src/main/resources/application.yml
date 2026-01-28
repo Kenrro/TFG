@@ -25,5 +25,7 @@ app:
         password: servicepass
         apiUrl: http://localhost:8081/api-key/get-public-key
         authServiceUrl: http://localhost:8081/api/auth/
-        productServiceUrl: http://localhost:8083/products
+        productServiceUrl: http://localhost:8082/products
+        incentive-service-user-points-url: http://localhost:8083/v1/user-points
+        incentive-service-stablishment-configuration-url: http://localhost:8083/v1/stablishment-configurations
     

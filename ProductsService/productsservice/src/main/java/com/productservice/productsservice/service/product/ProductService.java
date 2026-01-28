@@ -10,6 +10,7 @@ import com.productservice.productsservice.dto.products.ProductCreateRequestDto;
 import com.productservice.productsservice.dto.products.ProductResponsetDto;
 import com.productservice.productsservice.dto.stablishment.StablishmentResponseDto;
 import com.productservice.productsservice.entity.Product;
+import com.productservice.productsservice.exception.ProductGeneralException;
 import com.productservice.productsservice.jwt.JwtUtil;
 import com.productservice.productsservice.service.WebClientService;
 
@@ -23,6 +24,7 @@ public class ProductService {
     private final ProductCRUDService productCRUDService;
     private final JwtUtil jwtUtil;
     @Value("${app.servicescredential.establishment-service-stablishment-url}") private String stablishmentServiceUrl;
+    @Value("${app.servicescredential.incentive-service-incentive-url}") private String incentiveServiceUrl;
 
     public void createProduct(ProductCreateRequestDto request) {
         
@@ -60,10 +62,24 @@ public class ProductService {
         productCRUDService.updateProduct(id, request);
     }
     public void deleteProductById(Long id, String token) {
-        token = jwtUtil.cleanJwtToken(token);
-        String code = jwtUtil.getClaim(token, "establishmentCode", String.class);
-        productCRUDService.deleteById(id, code);
+        try {
+
+            token = jwtUtil.cleanJwtToken(token);
+            String code = jwtUtil.getClaim(token, "establishmentCode", String.class);
+            productCRUDService.deleteById(id, code);
+            deleteIncentiveFromIncentiveService(id);
+        } catch (ProductGeneralException e) {
+            throw e;
+        }
     }
+        private void deleteIncentiveFromIncentiveService(
+            Long productId
+        ) {
+            webClientService.secureDeleteMethod(
+                stablishmentServiceUrl + "/delete-by-product-id/{productId}", 
+                Void.class, 
+                productId);
+        }
     public List<DeleteProductResponsetDto> deleteAllProductsByCode(String stablishmentCode) {
         List<DeleteProductResponsetDto> deletedProducts = productCRUDService.findAllByStablishmentCode(stablishmentCode).stream().map(product -> 
             DeleteProductResponsetDto.builder()
@@ -75,7 +91,32 @@ public class ProductService {
             .stablishmentCode(product.getStablishmentCode())
             .build()
         ).toList();
-        productCRUDService.deleteProductsByStablishment(stablishmentCode);
+        try{
+            webClientService.secureDeleteMethod(
+                incentiveServiceUrl + "/delete-by-stablishment/{stablishmentCode}", 
+                Void.class, 
+                stablishmentCode);
+            productCRUDService.deleteProductsByStablishment(stablishmentCode);
+
+        } catch(ProductGeneralException e) {
+
+            throw e;
+        }
         return deletedProducts;
+    }
+    public List<ProductResponsetDto> getAllProductsByIds(List<Long> ids) {
+        return productCRUDService.findAllByIds(ids)
+        .stream()
+        .map(product -> 
+            ProductResponsetDto.builder()
+            .description(product.getDescription())
+            .name(product.getName())
+            .id(product.getId())
+            .price(product.getPrice())
+            .stablishmentCode(product.getStablishmentCode())
+            .build()
+        
+        ).toList();
+
     }
 }

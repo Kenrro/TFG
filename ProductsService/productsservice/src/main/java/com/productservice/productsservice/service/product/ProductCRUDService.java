@@ -7,9 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.productservice.productsservice.dto.products.DeleteProductResponsetDto;
-import com.productservice.productsservice.dto.products.DeletedProductsResponseDto;
 import com.productservice.productsservice.dto.products.ProductCreateRequestDto;
-import com.productservice.productsservice.dto.products.ProductResponsetDto;
 import com.productservice.productsservice.entity.Product;
 import com.productservice.productsservice.enums.ProductError;
 import com.productservice.productsservice.exception.ProductGeneralException;
@@ -133,6 +131,9 @@ public class ProductCRUDService {
         List<Product> deletedProducts = productRepository.findAllByStablishmentCode(stablishmentCode); 
         int deletedCount = productRepository.deleteAllByStablishmentCode(stablishmentCode);
         return deletedProducts; 
+    }
+    public List<Product> findAllByIds(List<Long> ids) {
+        return productRepository.findAllById(ids);
     }
 
 }
