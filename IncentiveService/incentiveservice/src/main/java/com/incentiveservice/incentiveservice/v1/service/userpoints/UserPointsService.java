@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.incentiveservice.incentiveservice.v1.dto.userpoints.UserPointsDto;
 import com.incentiveservice.incentiveservice.v1.dto.userpoints.UsersPointsDto;
 import com.incentiveservice.incentiveservice.v1.entity.UserPoints;
+import com.incentiveservice.incentiveservice.v1.jwt.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserPointsService {
     private final UserPointsCRUDService userPointsCRUDService;
-
+    private final JwtUtil jwtUtil;
     public void create(
         Long id,
         String stablishmentCode
@@ -28,9 +29,11 @@ public class UserPointsService {
     }
 
     public UserPointsDto getUserPointsByUserIdAndStablishmentCode(
-        Long id,
+        String token,
         String stablishmentCode
     ) {
+        token = jwtUtil.cleanJwtToken(token);
+        Long id = jwtUtil.getClaim(token, "id", Long.class);
         UserPoints userPoints = userPointsCRUDService.getByIdAndStablishmentCode(id, stablishmentCode);
         return UserPointsDto.builder()
             .balance(userPoints.getBalance())

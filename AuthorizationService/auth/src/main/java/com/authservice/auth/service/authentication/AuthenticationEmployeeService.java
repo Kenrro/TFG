@@ -11,10 +11,10 @@ import com.authservice.auth.dto.auth.AuthRegisterEmployeeRequestDTO;
 import com.authservice.auth.dto.auth.AuthResponseDto;
 import com.authservice.auth.dto.auth.AuthUpdateCustomerRequestDto;
 import com.authservice.auth.dto.auth.UserDto;
+import com.authservice.auth.dto.auth.UsersDto;
 import com.authservice.auth.dto.stablisment.CreateRelationUserWithStablishmentRequestDto;
-import com.authservice.auth.dto.stablisment.DeleteUsersInAuthServiceRequestDto;
-import com.authservice.auth.dto.stablisment.DeleteUsersInAuthServiceResponseDto;
 import com.authservice.auth.dto.stablisment.RollbackDeleteEmployeesRequestDto;
+import com.authservice.auth.dto.stablisment.UsersIdsRequestDto;
 import com.authservice.auth.entity.Role;
 import com.authservice.auth.entity.User;
 import com.authservice.auth.enums.AuthError;
@@ -84,8 +84,17 @@ public class AuthenticationEmployeeService {
                 }
             });
         }
+        // get stablishment code from stablishmentService
+        private String getEstablishmentCode(Long id) {
+            return webClientService.secureGetMethod(
+                stablishmentMicroServiceUrl + "/get-stablishment-code/{userId}",
+                String.class,
+                id);
+        }
    
-    // Register employee --------------------------------
+    // =========================================================
+    // Register Employee
+    // =========================================================
     @Transactional
     public void registerEmployee(AuthRegisterEmployeeRequestDTO request) {
         User user = User.builder()
@@ -101,7 +110,7 @@ public class AuthenticationEmployeeService {
             String establishmentCode = getEstablishmentCode();
             // call to establishment service to create relation user-establishment from webClientService
             webClientService.securePostMethod(
-                userStablishmentMicroServiceUrl + "/add-relation-user-stablishment",
+                userStablishmentMicroServiceUrl + "/add-relation-employee-stablishment",
                 CreateRelationUserWithStablishmentRequestDto.builder()
                     .userId(user.getId())
                     .StablishmentCode(establishmentCode)
@@ -110,15 +119,16 @@ public class AuthenticationEmployeeService {
             // send dto and if error delete user created before
 
         } catch(AuthException e){
-            userService.deleteUser(user.getId());
+            userService.deleteById(user.getId());
             throw e;
         } 
         catch(Exception e){
             e.printStackTrace();
-            userService.deleteUser(user.getId());
+            userService.deleteById(user.getId());
             throw new AuthException(AuthError.ERROR_CREATING_USER);
         }
     }
+        // Get stablishment code from userStablishmentService
         private String getEstablishmentCode() {
             Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -129,24 +139,21 @@ public class AuthenticationEmployeeService {
                 username = principal.toString(); // fallback
             }
 
-            // Luego buscar tu User en DB
+            // find admin user in db
             User admin = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException(AuthError.USER_NOT_FOUND));
-
+            // get stablishment code from stablishment service
             long adminId = admin.getId();
-            return webClientService.secureGetMethod(
-                stablishmentMicroServiceUrl + "/get-stablishment-code/{userId}",
-                String.class,
-                adminId);
+            return getEstablishmentCode(adminId);
         }
-        private String getEstablishmentCode(Long id) {
-            return webClientService.secureGetMethod(
-                stablishmentMicroServiceUrl + "/get-stablishment-code/{userId}",
-                String.class,
-                id);
-        }
-       
 
+
+        
+       
+    // =========================================================
+    // Create stablishment admin
+    // =========================================================
+    @Transactional
     public AuthCreateEstablishMentAdminResponseDto createEstablishmentAdmin(AuthRegisterEmployeeRequestDTO request) {
         User user = User.builder()
             .username(request.getUsername())
@@ -160,6 +167,10 @@ public class AuthenticationEmployeeService {
                 .adminId(user.getId().toString())
                 .build();
     }
+    // =========================================================
+    // LOGIN EMPLOYEE - ADMIN|SELLER
+    // =========================================================
+    @Transactional
     public AuthResponseDto loginEmployee(AuthLoginEmployeeRequestDto request) {
         User user;
         String code;
@@ -184,7 +195,9 @@ public class AuthenticationEmployeeService {
         
         return generateTokenForUser(user, code);
     }
-
+    // =========================================================
+    // UPDATE EMPLOYEE # Just for admin
+    // =========================================================
     @Transactional
     public void updateEmployee(Long id, AuthUpdateCustomerRequestDto request) {
         if (request.getRole() != null && request.getRole() != Role.ADMIN && request.getRole() != Role.SELLER) {
@@ -194,22 +207,40 @@ public class AuthenticationEmployeeService {
 
         // map of field names to their corresponding getters in AuthUpdateCustomerRequestDto
         Map<String, Function<AuthUpdateCustomerRequestDto, Object>> fieldMap = Map.of(
-        "username", AuthUpdateCustomerRequestDto::getUsername,
         "password", req -> request.getPassword() != null ? passwordEncoder.encode(req.getPassword()) : null,
         "name", AuthUpdateCustomerRequestDto::getName,
-        "lastname", AuthUpdateCustomerRequestDto::getLastname
+        "lastname", AuthUpdateCustomerRequestDto::getLastname,
+        "role", AuthUpdateCustomerRequestDto::getRole
         );
 
         copyNonNullProperties(request, user, fieldMap);
 
         userService.updateUser(user);
     }
+    // =========================================================
+    // DELETE A EMPLOYEE
+    // =========================================================
     @Transactional
-    public void deleteEmployee(Long id) {
-        userService.deleteUser(id);
+    public void deleteEmployee(Long id) { // Delete a employee and relations
+        deleteAllRelationsFromStablishmentService(id); // First step, delete relations from stablishment service
+        userService.deleteById(id); // delete user
     }
+        private void deleteAllRelationsFromStablishmentService(
+            Long id
+        ) {
+            webClientService.secureDeleteMethod(
+                userStablishmentMicroServiceUrl + "/delete-user-relations/{userId}", 
+                Void.class, 
+                id);
+        }
+
+    // =========================================================
+    // DELETE ALL EMPLOYEES 
+    // =========================================================
     @Transactional
-    public DeleteUsersInAuthServiceResponseDto deleteEmployees(DeleteUsersInAuthServiceRequestDto request) {
+    public UsersDto deleteEmployees(
+        UsersIdsRequestDto request
+    ) {
         List<UserDto> deletedUsers = userService.deleteEmployees(request).stream()
             .map(user -> UserDto.builder()
                 .id(user.getId())
@@ -221,10 +252,11 @@ public class AuthenticationEmployeeService {
                 .build())
             .toList();
         // return response
-        return DeleteUsersInAuthServiceResponseDto.builder()
-            .deletedUsers(deletedUsers)
+        return UsersDto.builder()
+            .users(deletedUsers)
             .build();
     }
+    // If delete all employees is failed, system do roll back
     public void rollbackDeleteEmployees(RollbackDeleteEmployeesRequestDto request) {
         List<User> users = request.getEmployees().stream().map(dto ->  
             User.builder()
@@ -237,6 +269,26 @@ public class AuthenticationEmployeeService {
                 .build()   
         ).toList();
         userService.saveAll(users);
+    }
+    // =========================================================
+    // GET ALL USERS
+    // =========================================================
+    public UsersDto getAllUsers(
+        UsersIdsRequestDto request
+    ) {
+        List<UserDto> users = userService.findAllEmployees(request).stream().map(user ->
+            UserDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .lastname(user.getLastname())
+                .username(user.getUsername())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .build())
+            .toList();
+        return UsersDto.builder()
+        .users(users)
+        .build();
     }
 
 }

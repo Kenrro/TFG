@@ -7,9 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
-import com.authservice.auth.dto.auth.UserDto;
-import com.authservice.auth.dto.stablisment.DeleteUsersInAuthServiceRequestDto;
-import com.authservice.auth.dto.stablisment.DeleteUsersInAuthServiceResponseDto;
+import com.authservice.auth.dto.stablisment.UsersIdsRequestDto;
 import com.authservice.auth.entity.User;
 import com.authservice.auth.enums.AuthError;
 import com.authservice.auth.exception.AuthException;
@@ -56,9 +54,22 @@ public class UserService {
         }
     }
 
-    public void deleteUser(Long id) {
+    public void deleteUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new AuthException(AuthError.USER_NOT_FOUND));
         try {
-            userRepository.deleteById(id);
+            userRepository.delete(user);
+        } catch (EmptyResultDataAccessException e) {
+            throw new AuthException(AuthError.USER_NOT_FOUND);
+        } catch (DataAccessException e) {
+            throw new AuthException(AuthError.DATABASE_ERROR);
+        }
+    }
+    public void deleteById(Long id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new AuthException(AuthError.USER_NOT_FOUND));
+        try {
+            userRepository.delete(user);
         } catch (EmptyResultDataAccessException e) {
             throw new AuthException(AuthError.USER_NOT_FOUND);
         } catch (DataAccessException e) {
@@ -66,7 +77,9 @@ public class UserService {
         }
     }
     @Transactional
-    public List<User> deleteEmployees(DeleteUsersInAuthServiceRequestDto request) {
+    public List<User> deleteEmployees(
+        UsersIdsRequestDto request
+    ) {
         // get users
         List<User> users = userRepository.findAllByIds(request.getUserIds());
 
@@ -79,6 +92,11 @@ public class UserService {
 
         // return response
         return users;
+    }
+    public List<User> findAllEmployees(
+        UsersIdsRequestDto request
+    ) {
+        return userRepository.findAllEmployees(request.getUserIds());
     }
 
     public void saveAll(List<User> users) {

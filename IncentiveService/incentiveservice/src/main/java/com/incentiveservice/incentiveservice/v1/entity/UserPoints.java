@@ -39,7 +39,8 @@ public class UserPoints {
     @Column(nullable = false)
     private int balance;
 
-    public void addPoints(double amount) {
+    public void addPoints(int amount) {
+        System.out.println(amount);
         if (amount <= 0) throw new GeneralException(UserPointsError.INVALID_POINTS_AMOUNT);
         balance += amount;
     }

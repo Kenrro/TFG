@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.stablishmentservice.stablishmentservice.dto.authorization.CreateStablishmentUserResponseDto;
-import com.stablishmentservice.stablishmentservice.dto.authorization.DeleteUsersInAuthServiceRequestDto;
+import com.stablishmentservice.stablishmentservice.dto.authorization.UsersIdsRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.authorization.DeleteUsersResponseDto;
+import com.stablishmentservice.stablishmentservice.dto.authorization.UsersDto;
 import com.stablishmentservice.stablishmentservice.dto.incentive.configuration.StablishmentConfigurationCreateRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.incentive.configuration.StablishmentConfigurationResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.products.DeletedProductsResponseDto;
@@ -71,17 +72,17 @@ public class StablishmentService {
             .getCode();
     }
     // =========================================================
-    // SAGA PATTERN
+    // SAGA PATTERN - CREATE STABLISHMENT AND ADMIN
     // =========================================================
     // 
     @Transactional
     public StablishmentAndAdminResponseDto createStablishmentWithAdmin(StablishmentRequestDto stablishmentDto,  
         AdminUserRequestDto admin) {
-            String code = GeneratedRamdonCode.generateUniqueCode(stablishmentDto.getName());
+            String code = GeneratedRamdonCode.generateUniqueCode(stablishmentDto.getName()); // generate the code with the letters
             Stablishment stablishment = null;
             Long adminId = null;
             StablishmentConfigurationResponseDto configuration = null;
-        
+        // 1. create stablishment
         stablishment = stablishmentCRUDService.create(Stablishment.builder()
         .name(stablishmentDto.getName())
         .address(stablishmentDto.getAddress())
@@ -90,12 +91,14 @@ public class StablishmentService {
         .build());
         
         try {
+            // 2. Call to auth service for crete admin with admin role
+            admin.setRole("ADMIN");
             CreateStablishmentUserResponseDto response = webClientService.securePostMethod(
                 authServiceUrl + "/create-establishment-admin",
                 admin, 
                 CreateStablishmentUserResponseDto.class);           
-            adminId = response.getAdminId();
-            // Create configuration
+            adminId = response.getAdminId(); // get user id
+            // 3. Create configuration in incentive service
             StablishmentConfigurationCreateRequestDto request = StablishmentConfigurationCreateRequestDto.builder()
             .stablishmentCode(code)
             .pointsPerEuro(10)
@@ -104,12 +107,13 @@ public class StablishmentService {
                 configurationServiceUrl, 
                 request, 
                 StablishmentConfigurationResponseDto.class);
-            // Crear relación entre usuario y establecimiento
+            // 4. create relationship between user and stablishment
             userStablishmentService.createUserEmployeeStablishmentRelation(
                 adminId, 
                 stablishment.getCode()
             );
         } catch (Exception e) {
+            e.printStackTrace();
             if (adminId != null) {
                 // rollback created user in authservice
                 webClientService.secureDeleteMethod(
@@ -123,6 +127,7 @@ public class StablishmentService {
             }
 
             if (configuration != null) {
+                // Delete configuration
                 webClientService.secureDeleteMethod(
                     configurationServiceUrl + "/{stablishmentCode}", 
                     Void.class, 
@@ -158,20 +163,17 @@ public class StablishmentService {
         token = jwtUtil.cleanJwtToken(token);
         String stablishmentCode = jwtUtil.getClaim(token, "establishmentCode", String.class);
         DeletedProductsResponseDto deletedProducts = null;
-        DeleteUsersResponseDto deleteUsersResponseDto = null;
+        UsersDto deleteUsersResponseDto = null;
         // get stablishment id
         Long stablishmentId = stablishmentCRUDService.findByCode(stablishmentCode).getId();
         List<Long> usersIds = userStablishmentService.getAllUsersIdByStablishmentId(stablishmentId);
         try {
             // Remove all users who are registered at the establishment
             deleteUsersResponseDto = webClientService.securePostMethod(authServiceUrl + "/delete-employees", 
-                DeleteUsersInAuthServiceRequestDto.builder()
+                UsersIdsRequestDto.builder()
                     .userIds(usersIds)
                     .build(),
-                    DeleteUsersResponseDto.class);
-                deleteUsersResponseDto.getDeletedUsers().stream().forEach(delete -> System.out.println("Entra"));
-                deleteUsersResponseDto.getDeletedUsers().stream().forEach(delete -> System.out.println(delete.getId()+" "+delete.getName()+" "+delete.getRole()+" "+delete.getLastname()+" "+delete.getLastname()));
-                deleteUsersResponseDto.getDeletedUsers().stream().forEach(delete -> System.out.println("Sale"));
+                    UsersDto.class);
             // Remove all productos from products service
             deletedProducts = webClientService.secureDeleteMethod(
                 productServiceUrl + "/delete-by-code/{code}",
@@ -196,7 +198,7 @@ public class StablishmentService {
                 // rollback deleted relations
                 if (deleteUsersResponseDto != null) {
                     userStablishmentService.rollbackDeleteStablishment(
-                    deleteUsersResponseDto.getDeletedUsers().stream().map(relation -> 
+                    deleteUsersResponseDto.getUsers().stream().map(relation -> 
                         UserStablishment.builder()
                         .userId(relation.getId())
                         .stablishmentId(stablishmentId)
@@ -222,9 +224,9 @@ public class StablishmentService {
         
     }
     // =========================================================
-    // GET STABLISHMENT BY TOKEN
+    // GET STABLISHMENTS BY TOKEN
     // =========================================================
-    // is for the customers
+    // Obtain all the establishments where the user is registered
     public List<StablishmentResponseDto> getStablishmentsByToken(String token) {
         token = jwtUtil.cleanJwtToken(token);
         Long userId = jwtUtil.getClaim(token, "id", Long.class);
@@ -239,5 +241,5 @@ public class StablishmentService {
         ).toList();
 
     }
-        
+       
 }

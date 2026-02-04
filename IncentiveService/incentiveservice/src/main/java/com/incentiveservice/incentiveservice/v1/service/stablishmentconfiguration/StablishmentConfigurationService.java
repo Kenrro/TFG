@@ -16,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 public class StablishmentConfigurationService {
     private final StablishmentConfigurationCRUDService stablishmentConfigurationCRUDService;
     private final JwtUtil jwtUtil;
+    // =========================================================
+    // GET STABLISHMENT BY CODE
+    // =========================================================
     public StablishmentConfigurationResponseDto getByStablishmentCode(
         String token
     ) {
@@ -27,6 +30,9 @@ public class StablishmentConfigurationService {
         .points_per_euro(stablishmentConfiguration.getPointsPerEuro())
         .build();
     }
+    // =========================================================
+    // CREATE STABLISHMENT CONFIGURATION
+    // =========================================================
     public StablishmentConfigurationResponseDto createStablishmentConfiguration(
         StablishmentConfigurationCreateRequestDto request
     ) {
@@ -37,6 +43,9 @@ public class StablishmentConfigurationService {
         .build();
 
     }
+    // =========================================================
+    // UPDATE CONFIGURATION
+    // =========================================================
     public void updateStablishmentConfiguration(
         StablishmentConfigurationUpdateRequestDto request,
         String token
@@ -45,6 +54,9 @@ public class StablishmentConfigurationService {
         String code = jwtUtil.getClaim(token, "establishmentCode", String.class);
         stablishmentConfigurationCRUDService.update(request, code);
     }
+    // =========================================================
+    // DELETE STABLISHMENT CONFIGURATION
+    // =========================================================
     public void deleteStablishmentConfiguration(
         String stablishmentCode
     ) {

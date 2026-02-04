@@ -19,16 +19,18 @@ public class AuthRegisterEmployeeRequestDTO {
 
     @NotBlank(message = "username is required")
     @Pattern(
-        regexp = "^\\+?[1-9]\\d{7,14}$",
-        message = "Invalid username"
+        regexp = "^(\\+34)?[6789]\\d{8}$",
+        message = "Número de teléfono español inválido"
     )
+    @NotNull(message = "name is required")
     private String username;
 
     @NotBlank(message = "password is required")
     @Pattern(
-        regexp = "^(?=.*[A-ZÁÉÍÓÚÑ])(?=.*[a-záéíóúñ])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-zÁÉÍÓÚÑáéíóúñ\\d@$!%*?&]{8,}$",
-        message = "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+        regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
+        message = "The password must be at least 8 characters long and include letters and numbers."
     )
+    @NotNull(message = "name is required")
     private String password;
 
     @NotBlank(message = "name is required")
@@ -36,6 +38,7 @@ public class AuthRegisterEmployeeRequestDTO {
         regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{2,30}$",
         message = "username invalid"
     )
+    @NotNull(message = "name is required")
     private String name;
 
     @NotBlank(message = "lastname is required")
@@ -43,6 +46,7 @@ public class AuthRegisterEmployeeRequestDTO {
         regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{2,30}$",
         message = "invalid last name"
     )
+    @NotNull(message = "name is required")
     private String lastname;
 
     @NotNull(message = "rol is required")

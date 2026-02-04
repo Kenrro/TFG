@@ -60,16 +60,10 @@ public class UserStablishmentCRUDService {
         }
     }
     @Transactional
-    public void deleteByUsertId(Long userId) {
+    public int deleteByUsertId(Long userId) {
+        int deleted = 0;
         try {
-            int deleted = userStablishmentRepository.deleteByUserId(userId);
-
-            if (deleted == 0) {
-                throw new StablishmentGeneralException(
-                    UserStablishmentError.USER_STABLISHMENT_RELATION_NOT_FOUND
-                );
-            }
-
+            deleted = userStablishmentRepository.deleteByUserId(userId);
         } catch (DataIntegrityViolationException e) {
             throw new StablishmentGeneralException(
                 UserStablishmentError.USER_STABLISHMENT_RELATION_DELETION_FAILED);
@@ -81,6 +75,7 @@ public class UserStablishmentCRUDService {
             throw new StablishmentGeneralException(
                 UserStablishmentError.USER_STABLISHMENT_RELATION_DELETION_FAILED);
         }
+        return deleted;
     }
     @Transactional
     public void deleteByUsertIdAndStablishmentId(Long userId, Long stablishmentId) {

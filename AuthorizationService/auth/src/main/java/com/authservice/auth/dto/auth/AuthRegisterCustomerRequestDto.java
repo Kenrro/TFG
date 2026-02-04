@@ -1,6 +1,7 @@
 package com.authservice.auth.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,31 +14,35 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AuthRegisterCustomerRequestDto {
 
-    @NotBlank(message = "El teléfono es obligatorio")
+    @NotBlank(message = "username is required")
     @Pattern(
-        regexp = "^\\+?[1-9]\\d{7,14}$",
-        message = "Número de teléfono inválido"
+        regexp = "^(\\+34)?[6789]\\d{8}$",
+        message = "Invalid username"
     )
+    @NotNull(message = "username is required")
     private String username;
 
-    @NotBlank(message = "La contraseña es obligatoria")
+    @NotBlank(message = "password id required")
     @Pattern(
-        regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-        message = "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial"
+        regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
+        message = "The password must be at least 8 characters long and include letters and numbers."
     )
+    @NotNull(message = "password id required")
     private String password;
 
-    @NotBlank(message = "El nombre es obligatorio")
+    @NotBlank(message = "Name is required")
     @Pattern(
         regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{2,30}$",
-        message = "Nombre inválido"
+        message = "Invalid name"
     )
+    @NotNull(message = "Name is required")
     private String name;
 
-    @NotBlank(message = "El apellido es obligatorio")
+    @NotBlank(message = "Last name is required")
     @Pattern(
         regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]{2,30}$",
-        message = "Apellido inválido"
+        message = "Invalid lastname"
     )
+    @NotBlank(message = "Last name is required")
     private String lastname;
 }

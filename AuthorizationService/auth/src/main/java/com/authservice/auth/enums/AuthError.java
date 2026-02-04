@@ -20,7 +20,8 @@ public enum AuthError implements IError {
     ERROR_UPDATING_EMPLOYEE(HttpStatus.INTERNAL_SERVER_ERROR, "Error updating the employee."),
     ERROR_ASOSCIATING_EMPLOYEE_ESTABLISHMENT(HttpStatus.INTERNAL_SERVER_ERROR, "Error associating employee to establishment."),
     SERVICE_COMMUNICATION_FAILED(HttpStatus.BAD_GATEWAY, "Failed to communicate with external service"),
-    UNEXPECTED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
+    UNEXPECTED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred"), 
+    INVALID_PASSWORD(HttpStatus.BAD_GATEWAY, "Invalid password");
     ;
 
     private final String message;

@@ -10,6 +10,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.stablishmentservice.stablishmentservice.jwt.JwtFilter;
 
+import org.springframework.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -28,8 +29,7 @@ public class SecurityConfig {
             .requestMatchers("/h2-console/**").permitAll()
             .requestMatchers("/test/**").permitAll()
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").permitAll()
-            .requestMatchers("/stablishments/**").permitAll()
-            .requestMatchers("/user-stablishments/**").permitAll()
+            .requestMatchers(HttpMethod.POST ,"/stablishments").permitAll() // for create stablishment
             .anyRequest().authenticated() 
 
         );

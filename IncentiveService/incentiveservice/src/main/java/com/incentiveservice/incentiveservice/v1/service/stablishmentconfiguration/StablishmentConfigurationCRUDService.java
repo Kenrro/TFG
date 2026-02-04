@@ -32,6 +32,7 @@ public class StablishmentConfigurationCRUDService {
     ) {
         StablishmentConfiguration stablishmentConfiguration = StablishmentConfiguration.builder()
         .stablishmentCode(requestDto.getStablishmentCode())
+        .pointsPerEuro(10)
         .build();
         try {
             return stablishmentConfigurationRepository.save(stablishmentConfiguration);

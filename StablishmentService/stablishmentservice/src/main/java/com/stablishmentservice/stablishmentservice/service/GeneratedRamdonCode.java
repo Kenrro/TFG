@@ -12,7 +12,7 @@ public class GeneratedRamdonCode {
     final private StablishmentRepository stablishmentRepository;
 
     public String generateUniqueCode(String name) {
-        String prefix = name.length() >= 3 ? name.substring(0, 3).toUpperCase()
+        String prefix = name.trim().length() >= 3 ? name.substring(0, 3).toUpperCase()
                                            : name.toUpperCase();
 
         // Buscar el último código con este prefijo

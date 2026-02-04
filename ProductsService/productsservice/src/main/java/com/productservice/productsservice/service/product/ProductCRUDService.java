@@ -26,9 +26,9 @@ public class ProductCRUDService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public void create(ProductCreateRequestDto request) {
+    public void create(String code, ProductCreateRequestDto request) {
         Product product = Product.builder()
-        .stablishmentCode(request.getStablishmentCode())
+        .stablishmentCode(code)
         .name(request.getName())
         .price(request.getPrice())
         .description(request.getDescription())

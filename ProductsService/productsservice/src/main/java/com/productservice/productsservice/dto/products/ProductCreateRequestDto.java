@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class ProductCreateRequestDto {
-    private String stablishmentCode;
     private String name;
     private String description;
     private float price;

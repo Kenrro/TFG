@@ -1,6 +1,7 @@
 package com.authservice.auth.dto.auth;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,8 +17,14 @@ public class AuthLoginEmployeeRequestDto {
         regexp = "^\\+?[1-9]\\d{7,14}$",
         message = "Invalid phone number format"
     )
+    @NotNull(message = "Phone number is required")
     private String username;
 
+    @NotBlank(message = "password is required")
+        @Pattern(
+        regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
+        message = "The password must be at least 8 characters long and include letters and numbers."
+    )
     @NotBlank(message = "Password is required")
     private String password;
 

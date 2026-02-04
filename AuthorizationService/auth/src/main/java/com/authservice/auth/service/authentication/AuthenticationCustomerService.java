@@ -15,6 +15,7 @@ import com.authservice.auth.exception.AuthException;
 import com.authservice.auth.jwt.JwtUtil;
 import com.authservice.auth.repository.UserRepository;
 import com.authservice.auth.service.UserService;
+import com.authservice.auth.service.WebClientService;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -40,6 +41,7 @@ public class AuthenticationCustomerService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
+    private final WebClientService webClientService;
     @Value("${app.microservices.establishment-service-userstablishment-url}")
     private String userStablishmentMicroServiceUrl;
     @Value("${app.microservices.establishment-service-stablishment-url}")
@@ -73,6 +75,9 @@ public class AuthenticationCustomerService {
                 }
             });
         }
+    // =========================================================
+    // REGISTER CUSTOMER
+    // =========================================================
     public AuthResponseDto registerCustomer(AuthRegisterCustomerRequestDto param) {
         User user = User.builder()
             .username(param.getUsername())
@@ -91,28 +96,53 @@ public class AuthenticationCustomerService {
         }
         return generateTokenForUser(user, null);
     } 
+    // =========================================================
+    // UPDATE CUSTOMER
+    // =========================================================
     @Transactional
     public void updateCustomer(String token, AuthUpdateCustomerRequestDto request) {
+
         token = jwtUtil.cleanJwtToken(token);
         Long id = jwtUtil.getClaim(token, "id", Long.class);
+
         User user = userRepository.findById(id)
-        .orElseThrow(() -> new AuthException(AuthError.USER_NOT_FOUND));
-        if (user.getRole() != null && user.getRole() != Role.CUSTOMER) {
+            .orElseThrow(() -> new AuthException(AuthError.USER_NOT_FOUND));
+
+        if (user.getRole() != Role.CUSTOMER) {
             throw new AuthException(AuthError.INVALID_ROLE_UPDATE_CUSTOMER);
         }
-        // map of field names to their corresponding getters in AuthUpdateCustomerRequestDto
-        Map<String, Function<AuthUpdateCustomerRequestDto, Object>> fieldMap = Map.of(
-        "username", AuthUpdateCustomerRequestDto::getUsername,
-        "password", req -> request.getPassword() != null ? passwordEncoder.encode(req.getPassword()) : null,
-        "name", AuthUpdateCustomerRequestDto::getName,
-        "lastname", AuthUpdateCustomerRequestDto::getLastname
-        );
 
-        copyNonNullProperties(request, user, fieldMap);
+        // Username
+        if (request.getUsername() != null) {
+            if (request.getUsername().isBlank()) {
+                throw new AuthException(AuthError.INVALID_USER_DATA);
+            }
+            user.setUsername(request.getUsername());
+        }
+
+        // Password (SIEMPRE encode)
+        if (request.getPassword() != null) {
+            if (request.getPassword().isBlank()) {
+                throw new AuthException(AuthError.INVALID_PASSWORD);
+            }
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        // Name
+        if (request.getName() != null) {
+            user.setName(request.getName());
+        }
+
+        // Lastname
+        if (request.getLastname() != null) {
+            user.setLastname(request.getLastname());
+        }
 
         userService.updateUser(user);
     }
-    // LOGIN CUSTOMER --------------------------------
+    // =========================================================
+    // LOGIN CUSTOMER
+    // =========================================================
     public AuthResponseDto loginCustomer(AuthLoginCustomerRequestDto requestDto) {
         try {
             Authentication auth = authenticationManager.authenticate(
@@ -134,14 +164,24 @@ public class AuthenticationCustomerService {
             throw new AuthException(AuthError.ERROR_LOGIN_CUSTOMER);
         }
     }
-    // Delete customer ------------------------------
+    // =========================================================
+    // DELETE CUSTOMER
+    // =========================================================
     @Transactional
     public void deleteCustomer() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        userService.deleteUser(
-            userService.findByUsername(username).getId()
-        );
+        Long id = userService.findByUsername(username).getId();
+        deleteAllRelationsFromStablishmentService(id);
+        userService.deleteById(id);
     }
+        private void deleteAllRelationsFromStablishmentService(
+            Long id
+        ) {
+            webClientService.secureDeleteMethod(
+                userStablishmentMicroServiceUrl + "/delete-user-relations/{userId}", 
+                Void.class, 
+                id);
+        }
     public Long getCustomerIdByUsername(String username) {
         return userService.findByUsername(username).getId();
     }

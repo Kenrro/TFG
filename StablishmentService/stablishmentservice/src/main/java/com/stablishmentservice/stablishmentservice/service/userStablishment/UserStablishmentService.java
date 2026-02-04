@@ -5,9 +5,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.stablishmentservice.stablishmentservice.dto.authorization.UsersDto;
+import com.stablishmentservice.stablishmentservice.dto.authorization.UsersIdsRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.incentive.points.UserPointsRequest;
 import com.stablishmentservice.stablishmentservice.dto.incentive.points.UsersPointsDto;
-import com.stablishmentservice.stablishmentservice.dto.stablishment.UserStablishmentResponseDto;
 import com.stablishmentservice.stablishmentservice.entity.UserStablishment;
 import com.stablishmentservice.stablishmentservice.enums.StablishmentError;
 import com.stablishmentservice.stablishmentservice.exception.StablishmentGeneralException;
@@ -58,6 +59,9 @@ public class UserStablishmentService {
         Long stablishmentId = getStablishmentIdByCode(stablishmentCode);
         userStablishmentCRUDService.create(userId, stablishmentId);
     }
+    // =========================================================
+    // CREATE USER ↔ ESTABLISHMENT RELATION
+    // =========================================================
     // overhead to create clients and wallet for points
     @Transactional
     public void createUserCustomerStablishmentRelation(
@@ -91,9 +95,8 @@ public class UserStablishmentService {
                 userPointsRequest, 
                 Void.class);
         }
-    // ------------------------------------------
     // =========================================================
-    // DELETE RELATIONS
+    // DELETE ALL STABLISHMENT RELATIONS
     // =========================================================
     @Transactional
     public void deleteUserStablishmentRelationsByStablishmentId(
@@ -109,6 +112,9 @@ public class UserStablishmentService {
             throw e;
         }
     }
+    // =========================================================
+    // CREATE USER ↔ ESTABLISHMENT RELATION
+    // =========================================================
     @Transactional
     public void deleteUserStablishmentRelationsByStablishmentId(
         Long stablishmentId
@@ -167,49 +173,77 @@ public class UserStablishmentService {
                 usersPointsDto, 
                 Void.class);
         }
-        // ========================================================= 
+    // =========================================================
+    // DELETE EMPLOYEE RALATION
+    // =========================================================
     @Transactional
     public void deleteEmployeeStablishmentRelations(
         Long userId
     ) {
         userStablishmentCRUDService.deleteByUsertId(userId);
     }
-    
+    // =========================================================
+    // GET ALL USERS ID BY STABLISHMENT ID
+    // =========================================================
     public List<Long> getAllUsersIdByStablishmentId(
         Long stablishmentId
     ) {
         return userStablishmentCRUDService.getAllIdsByStablishmentId(stablishmentId);
     }
+    // =========================================================
+    // GET RELATION BY USERS ID
+    // =========================================================
     public UserStablishment getRelationByUserId(
         Long userId
     ) {
         return userStablishmentCRUDService.getByEmployeeId(userId);    
     }
-    public List<UserStablishmentResponseDto> getAllEmployess(
+    // =========================================================
+    // GET EMPLOYEES
+    // =========================================================
+    public UsersDto getAllEmployess(
         String token
     ) {
         token = jwtUtil.cleanJwtToken(token);
         String stablishmentCode = jwtUtil.getClaim(token, "establishmentCode", String.class);
         Long stablishmentId = getStablishmentIdByCode(stablishmentCode);
-        return userStablishmentCRUDService.getByStablishmentId(stablishmentId)
-            .stream()
-            .map(relation -> UserStablishmentResponseDto.builder()
-                                .userId(relation.getUserId())
-                                .stablishmentId(relation.getStablishmentId())
-                                .build())
-            .toList();
+        List<UserStablishment> relations = userStablishmentCRUDService.getByStablishmentId(stablishmentId);
+        relations.forEach(relation -> System.out.println(relation.getId()));
+        return getUsersInfo(relations);
     }
+        // Get info from auth service
+        private UsersDto getUsersInfo(
+            List<UserStablishment> relations
+        ){
+            UsersIdsRequestDto ids = UsersIdsRequestDto.builder()
+            .userIds(
+                relations.stream().map(relation -> relation.getUserId()).toList()
+            ) 
+            .build();
+            UsersDto users = webClientService.securePostMethod(
+                authServiceUrl + "/get-all-employees",
+                ids, 
+                UsersDto.class);
+            users.getUsers().forEach(user -> System.out.println(user.getUsername()+"--------------------"));
+            return users;
+        }
     // =========================================================
     // DELETE RELATION CUSTOMER
     // =========================================================
-    public void deleteCustomerRelation(
-        String token
+    public void deleteCustomerRelationByUserId(
+        Long userId
     ) {
-        token = jwtUtil.cleanJwtToken(token);
-        Long userId = jwtUtil.getClaim(token, "id", Long.class);
-        userStablishmentCRUDService.deleteByUsertId(userId);
+        int result = userStablishmentCRUDService.deleteByUsertId(userId);
+        if (result > 0) deleteWallets(userId);
     }
-    
+        private UsersPointsDto deleteWallets(
+            Long id
+        ) {
+            return webClientService.secureDeleteMethod(
+                userPointsUrl + "/delete-all-user-wallets/{userId}", 
+                UsersPointsDto.class, 
+                id);
+        }
     public void deleteCustomerRelationByCodeAndUserId(
         String token,
         String stablishmentCode) {
@@ -240,7 +274,9 @@ public class UserStablishmentService {
                 stablishmentCode
             );
         }
-        // =========================================================
+    // =========================================================
+    // ROLLBACK DELETE STABLISHMENT
+    // =========================================================
     public void rollbackDeleteStablishment(
         List<UserStablishment> deletedRelations
     ) {

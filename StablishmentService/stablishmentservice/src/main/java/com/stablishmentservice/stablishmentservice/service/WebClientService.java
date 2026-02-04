@@ -59,9 +59,11 @@ public class WebClientService {
         } catch (StablishmentGeneralException ex) {
             throw ex;
         } catch (WebClientResponseException ex) {
+            ex.printStackTrace();
             throw new StablishmentGeneralException(
                 StablishmentError.SERVICE_COMMUNICATION_FAILED);
         } catch (Exception ex) {
+            ex.printStackTrace();
             throw new StablishmentGeneralException(
                 StablishmentError.UNEXPECTED_ERROR);
         }

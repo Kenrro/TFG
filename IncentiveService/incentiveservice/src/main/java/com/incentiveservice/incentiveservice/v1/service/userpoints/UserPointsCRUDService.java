@@ -64,6 +64,7 @@ public class UserPointsCRUDService {
             userPoints.addPoints(amount); 
             userPointsRepository.save(userPoints); 
         } catch (Exception e) {
+            e.printStackTrace();
             throw new GeneralException(UserPointsError.USER_POINTS_UPDATE_FAILED);
         }
 

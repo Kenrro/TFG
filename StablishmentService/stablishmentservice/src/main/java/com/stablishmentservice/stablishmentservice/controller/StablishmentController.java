@@ -10,10 +10,17 @@ import com.stablishmentservice.stablishmentservice.dto.stablishment.Stablishment
 import com.stablishmentservice.stablishmentservice.entity.Stablishment;
 import com.stablishmentservice.stablishmentservice.service.stablishment.StablishmentService;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -40,7 +47,7 @@ public class StablishmentController {
     private final StablishmentService stablishmentService;
 
     // =========================================================
-    // GET ALL ESTABLISHMENTS
+    // GET ALL STABLISHMENTS
     // =========================================================
     @GetMapping
     @Operation(
@@ -55,52 +62,131 @@ public class StablishmentController {
         return ResponseEntity.ok(stablishmentService.getAllStablishments());
     }
     // =========================================================
-    // CREATE ESTABLISHMENT
+    // CREATE STABLISHMENT
     // =========================================================
     @PostMapping
     @Operation(
         summary = "Create a new establishment",
-        description = "Create a new establishment along with its admin user.",
-        responses = {
-            @ApiResponse(responseCode = "201", description = "Establishment created successfully")
-        }
+        description = "Create a new establishment along with its admin user."
+    )
+    @ApiResponses({
+        @ApiResponse(
+            responseCode = "201",
+            description = "Establishment created successfully",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = StablishmentAndAdminResponseDto.class),
+                examples = @ExampleObject(
+                    name = "Success response",
+                    value = """
+                    {
+                    "name": "Sazón Lempira",
+                    "description": "Restaurante de comida mediterránea",
+                    "address": "Calle Mayor 25, Madrid",
+                    "code": "SAZ-0001"
+                    }
+                    """
+                )
+            )
+        )
+    })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Create stablishmetn",
+        required = true,
+        content = @Content(
+            schema = @Schema(implementation = StablishmentRequestDto.class),
+            examples = {
+                @ExampleObject(
+                    name = "Create establishment",
+                    summary = "Valid create request",
+                    value = """
+                {
+                "stablishment": {
+                    "name": "Sazón lempira",
+                    "address": "Calle Carpo y Torta 2",
+                    "phone": "+34604808080",
+                    "email": "sazon@gmial.com",
+                    "description": "Restaurante típico Hondureño con 4 años de existir"
+                },
+                "adminUser": {
+                    "username": "666889922",
+                    "password": "Password3@",
+                    "name": "Misahel",
+                    "lastname": "Peña"
+                }
+                }
+                    """
+                )
+            }
+        )
     )
     public ResponseEntity<StablishmentAndAdminResponseDto> createStablishment(
-            @RequestBody @Parameter(description = "Establishment and admin user details") StablishmentAndAdminRequestDto stablishmentAndAdminRequestDto) {
+            @RequestBody
+            @Parameter(description = "Establishment and admin user details")
+            @Valid StablishmentAndAdminRequestDto stablishmentAndAdminRequestDto) {
 
-        StablishmentAndAdminResponseDto response = stablishmentService.createStablishmentWithAdmin(
-                stablishmentAndAdminRequestDto.getStablishment(),
-                stablishmentAndAdminRequestDto.getAdminUser()
-        );
+        StablishmentAndAdminResponseDto response =
+                stablishmentService.createStablishmentWithAdmin(
+                        stablishmentAndAdminRequestDto.getStablishment(),
+                        stablishmentAndAdminRequestDto.getAdminUser()
+                );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // =========================================================
-    // UPDATE ESTABLISHMENT
+    // UPDATE STABLISHMENT
     // =========================================================
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
     @PutMapping
     @Operation(
         summary = "Update an establishment",
-        description = "Update an existing establishment by ID. Requires ADMIN role.",
+        description = "Update an existing establishment. Requires ADMIN role.",
         responses = {
             @ApiResponse(responseCode = "200", description = "Establishment updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Establishment not found")
+            @ApiResponse(responseCode = "404", description = "Establishment not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - ADMIN role required")
         }
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Updated establishment details",
+        required = true,
+        content = @Content(
+            schema = @Schema(implementation = StablishmentRequestDto.class),
+            examples = {
+                @ExampleObject(
+                    name = "Update establishment",
+                    summary = "Valid update request",
+                    value = """
+                    {
+                        "name": "Sazón lempira",
+                        "address": "Calle Carpo y Torta 2",
+                        "phone": "+34604808080",
+                        "email": "sazon@gmial.com",
+                        "description": "Restaurante típico Hondureño con años de existir"
+                    }
+                    """
+                )
+            }
+        )
     )
     public ResponseEntity<Void> updateStablishment(
             @RequestHeader("Authorization") String token,
-            @RequestBody @Parameter(description = "Updated establishment details") StablishmentRequestDto body) {
+            @RequestBody StablishmentRequestDto body
+    ) {
 
         stablishmentService.updateStablishment(body, token);
         return ResponseEntity.ok().build();
     }
 
+
     // =========================================================
-    // DELETE ESTABLISHMENT
+    // DELETE STABLISHMENT
     // =========================================================
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping
     @Operation(
         summary = "Delete an establishment",
@@ -118,8 +204,9 @@ public class StablishmentController {
     }
 
     // =========================================================
-    // GET ESTABLISHMENT CODE BY USER ID
+    // GET STABLISHMENT CODE BY USER ID
     // =========================================================
+    @Hidden
     @PreAuthorize("hasRole('SERVICE')")
     @GetMapping("/get-stablishment-code/{userId}")
     @Operation(
@@ -138,32 +225,112 @@ public class StablishmentController {
     }
 
     // =========================================================
-    // GET ESTABLISHMENT(S) BY TOKEN
+    // GET STABLISHMENT(S) BY TOKEN
     // =========================================================
-    @PreAuthorize("hasRole('CUSTOMER')")
-    @GetMapping("/get-stablihsment-by-token")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/get-stablihsments-by-token")
     @Operation(
         summary = "Get establishments for the current user",
         description = "Retrieve establishments associated with the current user from the token. Requires CUSTOMER role.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Establishments retrieved successfully"),
+            @ApiResponse(
+                responseCode = "200",
+                description = "Establishments retrieved successfully",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = StablishmentResponseDto.class),
+                    examples = {
+                        @ExampleObject(
+                            name = "Establishments list",
+                            summary = "Example response",
+                            value = """
+                            [
+                            {
+                                "name": "Restaurante El Buen Sabor",
+                                "address": "Calle Mayor 25, Madrid",
+                                "phone": "+34678123456",
+                                "email": "contacto@buensabor.com",
+                                "description": "Restaurante de comida mediterránea"
+                            },
+                            {
+                                "name": "Café Central",
+                                "address": "Plaza España 3, Madrid",
+                                "phone": "+34911222333",
+                                "email": "info@cafecentral.com",
+                                "description": "Cafetería tradicional"
+                            }
+                            ]
+                            """
+                        )
+                    }
+                )
+            ),
             @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
             @ApiResponse(responseCode = "403", description = "Forbidden - CUSTOMER role required")
         }
     )
     public ResponseEntity<List<StablishmentResponseDto>> getStablishmentByToken(
-            @RequestHeader("Authorization") @Parameter(description = "Bearer token for authentication") String authHeader) {
+            @RequestHeader("Authorization")
+            @Parameter(description = "Bearer token for authentication")
+            String authHeader
+    ) {
 
-        List<StablishmentResponseDto> stablishments = stablishmentService.getStablishmentsByToken(authHeader);
+        List<StablishmentResponseDto> stablishments =
+                stablishmentService.getStablishmentsByToken(authHeader);
+
         return ResponseEntity.ok(stablishments);
     }
     // =========================================================
-    // GET ESTABLISHMENT(S) BY CODE
+    // GET STABLISHMENT(S) BY CODE
     // =========================================================
+    @Hidden
+    @PreAuthorize("hasRole('SERVICE')")
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/get-stablishment-by-code/{code}")
-    public ResponseEntity<StablishmentResponseDto> getStablishmentByCode(@PathVariable String code) {
-        StablishmentResponseDto response = stablishmentService.getStablishmentByCode(code);
+    @Operation(
+        summary = "Get establishment by code",
+        description = "Retrieve an establishment using its unique code. Requires SERVICE role.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Establishment retrieved successfully",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = StablishmentResponseDto.class),
+                    examples = {
+                        @ExampleObject(
+                            name = "Establishment response",
+                            summary = "Example establishment",
+                            value = """
+                            {
+                            "name": "Restaurante El Buen Sabor",
+                            "address": "Calle Mayor 25, Madrid",
+                            "phone": "+34678123456",
+                            "email": "contacto@buensabor.com",
+                            "description": "Restaurante de comida mediterránea"
+                            }
+                            """
+                        )
+                    }
+                )
+            ),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - SERVICE role required"),
+            @ApiResponse(responseCode = "404", description = "Establishment not found")
+        }
+    )
+    public ResponseEntity<StablishmentResponseDto> getStablishmentByCode(
+            @PathVariable
+            @Parameter(description = "Unique establishment code", example = "EST-9F3A2B")
+            String code
+    ) {
+
+        StablishmentResponseDto response =
+                stablishmentService.getStablishmentByCode(code);
+
         return ResponseEntity.ok(response);
     }
+
     
 }

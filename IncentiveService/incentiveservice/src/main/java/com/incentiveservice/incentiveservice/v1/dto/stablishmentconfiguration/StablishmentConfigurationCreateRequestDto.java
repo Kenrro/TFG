@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StablishmentConfigurationCreateRequestDto {
-
+   
     private int pointsPerEuro = 10;
     private String stablishmentCode;
 }

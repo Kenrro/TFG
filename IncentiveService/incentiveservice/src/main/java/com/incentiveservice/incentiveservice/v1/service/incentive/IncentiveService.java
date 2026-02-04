@@ -28,6 +28,9 @@ public class IncentiveService {
     private final WebClientService WebClientService;
     private final JwtUtil jwtUtil;
 
+    // =========================================================
+    // GET INCENTIVE
+    // =========================================================
     public ProductsIncentivesDto getIncentive(
         String stablishmentCode
     ) {
@@ -43,7 +46,7 @@ public class IncentiveService {
             .build()
         ).toList();
         ProductsResponseDto products = getProductsFromProductService(
-            incentives.stream().map(incentive-> incentive.getId()).toList()
+            incentives.stream().map(incentive-> incentive.getProductId()).toList()
         );
         products.getProducts().stream().forEach(product -> System.out.println(product.getId()));
         List<ProductIncentiveResponseDto> productsIncentive = products.getProducts().stream().map(product ->
@@ -56,11 +59,14 @@ public class IncentiveService {
         .incentives(productsIncentive)
         .build();
     }
+    // =========================================================
+    // GET INCENTIVE BY ID
+    // =========================================================
     public ProductIncentiveResponseDto getIncentiveById(
         Long id
     ) {
         Incentive incentive = incentiveCRUDService.getIncentivesById(id);
-        ProductResponseDto product = getProductsFromProductService(List.of(incentive.getId())).getProducts().get(0);
+        ProductResponseDto product = getProductsFromProductService(List.of(incentive.getProductId())).getProducts().get(0);
         return ProductIncentiveResponseDto.builder()
         .incentiveResponseDto(
             IncentiveResponseDto.builder()
@@ -74,13 +80,16 @@ public class IncentiveService {
         .productResponsetDto(product)
         .build();
     }
-    //Find products in product service by ids
+    // Find products in product service by ids
         private ProductsResponseDto getProductsFromProductService(List<Long> ids) {
             return WebClientService.securePostMethod(
                 productServiceUrl + "/get-all-by-ids", 
                 ids, 
                 ProductsResponseDto.class);
         }
+    // =========================================================
+    // CREATE INCENTIVE
+    // =========================================================
     public void createIncentive(
         IncentiveCreateRequestDto request
     ) {
@@ -95,7 +104,9 @@ public class IncentiveService {
                 ProductsResponseDto.class, 
                 id);
         }
-    
+    // =========================================================
+    // UPDATE INCENTIVE
+    // =========================================================
     public void updateIncentive(
         IncentiveUpdateDto request,
         Long id,
@@ -105,20 +116,28 @@ public class IncentiveService {
         codeByToken = jwtUtil.getClaim(codeByToken, "establishmentCode", String.class);
         incentiveCRUDService.update(request, id, codeByToken);
     }
-
+    // =========================================================
+    // DELETE BY ID
+    // =========================================================
     public void deleteById(
         Long id,
         String token
     ) {
         String codeByToken = jwtUtil.cleanJwtToken(token);
-        codeByToken = jwtUtil.getClaim(token, "establishmentCode", String.class);
+        codeByToken = jwtUtil.getClaim(codeByToken, "establishmentCode", String.class);
         incentiveCRUDService.delete(id, codeByToken);
     }
+    // =========================================================
+    // DELETE ALL BY STABLISHMENT CODE WHEN ELIMINATED STABLISHMENT
+    // =========================================================
     public void deleteAllByStablishmentCode(
         String stablishmentCode
     ) {
         incentiveCRUDService.deleteAllByStablishmentCode(stablishmentCode);
     }
+    // =========================================================
+    // DELETE BY PRODUCT ID WHEN ELIMINATED PRODUCT
+    // =========================================================
     public void deleteByProductId(
         Long productId
     ) {

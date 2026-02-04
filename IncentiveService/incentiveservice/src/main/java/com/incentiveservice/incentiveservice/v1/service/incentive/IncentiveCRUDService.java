@@ -68,7 +68,7 @@ public class IncentiveCRUDService {
     ) {
         Incentive incentive = incentiveRepository.findById(id)
         .orElseThrow(()-> new GeneralException(IncentiveError.INCENTIVE_NOT_FOUND));
-        if (incentive.getStablishmentCode().equals(codeByToken)) throw new GeneralException(IncentiveError.USER_NOT_AUTHORIZED);
+        if (!incentive.getStablishmentCode().equals(codeByToken)) throw new GeneralException(IncentiveError.USER_NOT_AUTHORIZED);
         incentiveRepository.delete(incentive);
     }
     public void deleteAllByStablishmentCode(

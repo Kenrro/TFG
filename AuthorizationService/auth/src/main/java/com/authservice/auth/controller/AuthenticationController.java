@@ -10,16 +10,22 @@ import com.authservice.auth.dto.auth.AuthRegisterCustomerRequestDto;
 import com.authservice.auth.dto.auth.AuthRegisterEmployeeRequestDTO;
 import com.authservice.auth.dto.auth.AuthResponseDto;
 import com.authservice.auth.dto.auth.AuthUpdateCustomerRequestDto;
-import com.authservice.auth.dto.stablisment.DeleteUsersInAuthServiceRequestDto;
-import com.authservice.auth.dto.stablisment.DeleteUsersInAuthServiceResponseDto;
+import com.authservice.auth.dto.auth.AuthUpdateEmployeeRequestDto;
+import com.authservice.auth.dto.auth.UsersDto;
 import com.authservice.auth.dto.stablisment.RollbackDeleteEmployeesRequestDto;
-import com.authservice.auth.jwt.JwtUtil;
+import com.authservice.auth.dto.stablisment.UsersIdsRequestDto;
 import com.authservice.auth.service.authentication.AuthenticationCustomerService;
 import com.authservice.auth.service.authentication.AuthenticationEmployeeService;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +45,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 
 
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -48,7 +55,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 )
 public class AuthenticationController {
 
-    private final JwtUtil jwtUtil;
 
     // TODO: IMPLEMENT open api SPECIFICATION 👍
     // Upgrade springdoc especifications for more information for the user👍
@@ -69,8 +75,9 @@ public class AuthenticationController {
         return ResponseEntity.ok(id);
     }
     
-    
-
+    // =========================================================
+    // REGISTER CUSTOMER
+    // =========================================================
     @PostMapping("/register-customer")
     @Operation(
         summary = "Register a new customer",
@@ -86,13 +93,37 @@ public class AuthenticationController {
             )
         }
     )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Customer registration data",
+        required = true,
+        content = @Content(
+            schema = @Schema(implementation = AuthRegisterCustomerRequestDto.class),
+            examples = {
+                @ExampleObject(
+                    name = "Valid customer",
+                    summary = "Example of a valid customer registration",
+                    value = """
+                    {
+                        "username": "622926844",
+                        "name": "Kevin",
+                        "lastname": "Zelaya",
+                        "password": "Password123"
+                    }
+                    """
+                )
+            }
+        )
+    )
+    @PermitAll
     public ResponseEntity<AuthResponseDto> registerCustomer(
         @RequestBody @Valid AuthRegisterCustomerRequestDto request
     ) {
         authenticationCustomerService.registerCustomer(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-
+    // =========================================================
+    // LOGIN CUSTOMER
+    // =========================================================
     @PostMapping("/login-customer")
     @Operation(
         summary = "Customer login",
@@ -100,7 +131,23 @@ public class AuthenticationController {
         responses = {
             @ApiResponse(
                 responseCode = "200",
-                description = "Customer logged in successfully"
+                description = "Customer logged in successfully",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = AuthResponseDto.class),
+                    examples = {
+                        @ExampleObject(
+                            name = "Login success",
+                            summary = "JWT token response",
+                            value = """
+                            {
+                            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                            "expiresIn": 3600
+                            }
+                            """
+                        )
+                    }
+                )
             ),
             @ApiResponse(
                 responseCode = "401",
@@ -108,13 +155,37 @@ public class AuthenticationController {
             )
         }
     )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Login customer data",
+        required = true,
+        content = @Content(
+            schema = @Schema(implementation = AuthLoginCustomerRequestDto.class),
+            examples = {
+                @ExampleObject(
+                    name = "Valid customer",
+                    summary = "Example of a valid customer loggin",
+                    value = """
+                    {
+                    "username": "622926844",
+                    "password": "Password123"
+                    }
+                    """
+                )
+            }
+        )
+    )
+    @PermitAll
     public ResponseEntity<AuthResponseDto> loginCustomer(
         @RequestBody @Valid AuthLoginCustomerRequestDto entity
     ) {
         return ResponseEntity.ok(authenticationCustomerService.loginCustomer(entity));
     }
-
+    // =========================================================
+    // UPDATE CUSTOMER
+    // =========================================================
     @PutMapping("/update-customer")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(
 
         summary = "Update an existing customer",
@@ -134,6 +205,27 @@ public class AuthenticationController {
             )
         }
     )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Customer update data",
+        required = true,
+        content = @Content(
+            schema = @Schema(implementation = AuthUpdateCustomerRequestDto.class),
+            examples = {
+                @ExampleObject(
+                    name = "Valid customer",
+                    summary = "Example of a valid customer update",
+                    value = """
+                    {
+                        "username": "688965423",
+                        "name": "Misahel",
+                        "lastname": "Peña",
+                        "password": "password321"
+                    }
+                    """
+                )
+            }
+        )
+    )
     public ResponseEntity<Void> updateCustomer(
         @RequestHeader("Authorization") String token, 
         @RequestBody @Valid AuthUpdateCustomerRequestDto entity) {
@@ -141,7 +233,13 @@ public class AuthenticationController {
         
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-    @PreAuthorize("hasRole('CUSTOMER')")
+
+    // =========================================================
+    // DELETE CUSTOMER
+    // =========================================================
+    // TODO: al eliminar si no hay relaciones da error
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/delete-customer")
     @Operation(
         summary = "Delete an existing customer",
@@ -164,7 +262,11 @@ public class AuthenticationController {
     
      // End customer Endpoints
      // Employee Endpoints
-    @PreAuthorize("hasRole('ADMIN')")
+    // =========================================================
+    // rEGISTER EMPLOYEE
+    // =========================================================
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/register-employee")
     // Only admin can register employee
     @Operation(
@@ -185,13 +287,39 @@ public class AuthenticationController {
             )
         }
     )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Employee create data for admin",
+        required = true,
+        content = @Content(
+            schema = @Schema(implementation = AuthRegisterEmployeeRequestDTO.class),
+            examples = {
+                @ExampleObject(
+                    name = "Valid Employee",
+                    summary = "Example of a valid employee update",
+                    value = """
+                    {
+                    "username": "+34678123456",
+                    "password": "Password123",
+                    "name": "Juan",
+                    "lastname": "Pérez",
+                    "role": "SELLER"
+                    }
+                    """
+                )
+            }
+        )
+    )
     public ResponseEntity<Void> registerSeller(
         @RequestBody @Valid AuthRegisterEmployeeRequestDTO request
     ) {
         authenticationEmployeeService.registerEmployee(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-    @PreAuthorize("hasRole('ADMIN')")
+
+    // =========================================================
+    // UPDATE EMPLOYEE
+    // =========================================================
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/update-employee/{id}")
     @Operation(
 
@@ -215,20 +343,65 @@ public class AuthenticationController {
                 description = "Employee not found"
             )
         }
+
     )
-    public ResponseEntity<Void> updateEmployee(@PathVariable Long id, @RequestBody @Valid AuthUpdateCustomerRequestDto entity) {
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Employee update data",
+        required = true,
+        content = @Content(
+            schema = @Schema(implementation = AuthUpdateEmployeeRequestDto.class),
+            examples = {
+                @ExampleObject(
+                    name = "Valid Employee",
+                    summary = "Example of a valid employee update",
+                    value = """
+                    {
+                        "username": "688965423",
+                        "name": "Misahel",
+                        "lastname": "Peña",
+                        "password": "password321"
+                    }
+                    """
+                )
+            }
+        )
+    )
+    public ResponseEntity<Void> updateEmployee(
+        @PathVariable Long id, 
+        @RequestBody @Valid AuthUpdateCustomerRequestDto entity
+    ) {
         authenticationEmployeeService.updateEmployee(id, entity);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    // =========================================================
+    // LOGIN EMPLOYEE
+    // =========================================================
     @PostMapping("/login-employee") // Seller and Admin login
+    @PermitAll
     @Operation(
         summary = "Employee login",
         description = "Endpoint for employees (sellers and admins) to log in to the system.",
         responses = {
             @ApiResponse(
                 responseCode = "200",
-                description = "Employee logged in successfully"
+                description = "Employee logged in successfully",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = AuthResponseDto.class),
+                    examples = {
+                        @ExampleObject(
+                            name = "Login success",
+                            summary = "JWT token response",
+                            value = """
+                            {
+                            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                            "expiresIn": 3600
+                            }
+                            """
+                        )
+                    }
+                )
             ),
             @ApiResponse(
                 responseCode = "401",
@@ -240,14 +413,36 @@ public class AuthenticationController {
             )
         }
     )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Login employee data",
+        required = true,
+        content = @Content(
+            schema = @Schema(implementation = AuthLoginEmployeeRequestDto.class),
+            examples = {
+                @ExampleObject(
+                    name = "Valid employee",
+                    summary = "Example of a valid employee loggin",
+                    value = """
+                    {
+                        "username": "666889922",
+                        "password": "Password3@",
+                        "establishmentCode": "SAZ-0001"
+                    }
+                    """
+                )
+            }
+        )
+    )
     public ResponseEntity<AuthResponseDto> loginEmployee(
         @RequestBody @Valid AuthLoginEmployeeRequestDto request
     ) {
         return ResponseEntity.ok(authenticationEmployeeService.loginEmployee(request));
     }
-    
-    // End Employee Endpoints
+    // =========================================================
+    // CREATE STABLISHMENT ADMIN
+    // =========================================================
     // Admin Endpoints
+    @Hidden
     @PreAuthorize("hasRole('SERVICE')")
     @PostMapping("/create-establishment-admin") // Is used to create the first admin of an establishment, called by the establishment service
     @Operation(
@@ -270,7 +465,10 @@ public class AuthenticationController {
         AuthCreateEstablishMentAdminResponseDto response = authenticationEmployeeService.createEstablishmentAdmin(entity);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SERVICE')")
+    // =========================================================
+    // DELETE AN EMPLOYEE
+    // =========================================================
+    @PreAuthorize("hasAuthority('ADMIN') or hasRole('SERVICE')")
     @DeleteMapping("/delete-employee/{id}")
     @Operation(
         summary = "Delete an existing employee",
@@ -296,15 +494,52 @@ public class AuthenticationController {
         authenticationEmployeeService.deleteEmployee(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    // =========================================================
+    // DELETE ALL EMPLOYEES
+    // =========================================================
+    @Hidden
     @PreAuthorize("hasRole('SERVICE')")
     @PostMapping("/delete-employees")
-     @Operation(
+    @Operation(
         summary = "Delete multiple employees",
         description = "Endpoint to delete multiple employees from the system. Only accessible by service role.",
         responses = {
             @ApiResponse(
                 responseCode = "200",
-                description = "Employees deleted successfully"
+                description = "Employees deleted successfully",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(
+                        implementation = UsersIdsRequestDto.class
+                    ),
+                    examples = {
+                        @ExampleObject(
+                            name = "Successful deletion",
+                            summary = "Employees deleted correctly",
+                            value = """
+                            {
+                            "deletedUsers": [
+                                {
+                                "id": 10,
+                                "username": "689654569",
+                                "name": "Kevin",
+                                "lastname": "Zelaya"
+                                "role": "ADMIN"
+                                },
+                                {
+                                "id": 11,
+                                "username": "689654565",
+                                "name": "Kevin",
+                                "lastname": "Peña",
+                                "role": "SELLER"
+                                }
+                            ]
+                            }
+                            """
+                        )
+                    }
+                )
             ),
             @ApiResponse(
                 responseCode = "403",
@@ -312,12 +547,19 @@ public class AuthenticationController {
             )
         }
     )
-    public ResponseEntity<DeleteUsersInAuthServiceResponseDto> deleteEmployees(
-        @RequestBody DeleteUsersInAuthServiceRequestDto request
+    public ResponseEntity<UsersDto> deleteEmployees(
+        @RequestBody UsersIdsRequestDto request
     ) {
-        DeleteUsersInAuthServiceResponseDto response = authenticationEmployeeService.deleteEmployees(request);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        UsersDto response =
+            authenticationEmployeeService.deleteEmployees(request);
+
+        return ResponseEntity.ok(response);
     }
+
+    // =========================================================
+    // ROLLBACK DELETE EMPLOYEES
+    // =========================================================
+    @Hidden
     @PreAuthorize("hasRole('SERVICE')")
     @PostMapping("/rollback-delete-employees")
      @Operation(
@@ -340,6 +582,18 @@ public class AuthenticationController {
         authenticationEmployeeService.rollbackDeleteEmployees(request);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+    // GET METHODS
+    @Hidden
+    @PreAuthorize("hasRole('SERVICE')")
+    @PostMapping("/get-all-employees")
+    public ResponseEntity<UsersDto> getUsers(
+        @RequestBody UsersIdsRequestDto request
+    ) {
+        UsersDto users = authenticationEmployeeService.getAllUsers(request);
+        users.getUsers().stream().forEach(user -> System.out.println(user.getUsername()));
+        return ResponseEntity.ok(users);
+    }
+    
     
     
 }
