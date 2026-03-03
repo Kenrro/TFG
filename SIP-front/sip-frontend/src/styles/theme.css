@@ -1,0 +1,20 @@
+:root {
+  /* Primary */
+  --color-primary: #2563EB;
+  --color-primary-dark: #1E3A8A;
+  --color-primary-light: #60A5FA;
+
+  /* Neutrals */
+  --color-white: #FFFFFF;
+  --color-gray-light: #F3F4F6;
+  --color-gray-dark: #374151;
+
+  /* Accent */
+  --color-accent: #F59E0B;
+
+  /* UI */
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  --shadow-card: 0 10px 30px rgba(0,0,0,0.08);
+}

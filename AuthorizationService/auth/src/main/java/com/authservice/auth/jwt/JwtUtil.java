@@ -32,14 +32,16 @@ public class JwtUtil {
 
     @PostConstruct
     private void init() throws Exception {
-        byte[] keyBytes = Base64.getDecoder().decode(
-        secretStr
-            .replaceAll("\\s+", "")   // elimina saltos y espacios
-        );
+        String pem = secretStr
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s+", "");
+
+        byte[] keyBytes = Base64.getDecoder().decode(pem);
+
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory kf =KeyFactory.getInstance("RSA");
+        KeyFactory kf = KeyFactory.getInstance("RSA");
         this.privateKey = kf.generatePrivate(spec);
-        
     }
     @PostConstruct
     private void createServiceToken() {

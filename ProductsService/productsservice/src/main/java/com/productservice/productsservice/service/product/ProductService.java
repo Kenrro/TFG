@@ -10,7 +10,7 @@ import com.productservice.productsservice.dto.products.ProductCreateRequestDto;
 import com.productservice.productsservice.dto.products.ProductResponsetDto;
 import com.productservice.productsservice.dto.stablishment.StablishmentResponseDto;
 import com.productservice.productsservice.entity.Product;
-import com.productservice.productsservice.exception.ProductGeneralException;
+import com.productservice.productsservice.exception.GeneralException;
 import com.productservice.productsservice.jwt.JwtUtil;
 import com.productservice.productsservice.service.WebClientService;
 
@@ -84,7 +84,7 @@ public class ProductService {
             String code = jwtUtil.getClaim(token, "establishmentCode", String.class);
             productCRUDService.deleteById(id, code);
             deleteIncentiveFromIncentiveService(id);
-        } catch (ProductGeneralException e) {
+        } catch (GeneralException e) {
             throw e;
         }
     }
@@ -118,7 +118,7 @@ public class ProductService {
                 stablishmentCode);
             productCRUDService.deleteProductsByStablishment(stablishmentCode);
 
-        } catch(ProductGeneralException e) {
+        } catch(GeneralException e) {
 
             throw e;
         }

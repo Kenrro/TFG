@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://transaction-db:5432/transaction_db
+    driver-class-name: org.postgresql.Driver
+    username: transaction_user
+    password: transaction_pass
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+app:
+  servicescredential:
+    apiUrl: http://auth-service:8080/api-key/get-public-key
+    authServiceUrl: http://auth-service:8080/api/auth/
+    establishment-service-stablishment-url: http://stablishment-service:8080/stablishments
+    product-service-url: http://product-service:8080/products
+    transaction-process-url: http://transaction-service:8080/v1/transaction-process

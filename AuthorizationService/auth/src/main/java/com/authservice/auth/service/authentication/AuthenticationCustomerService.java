@@ -11,7 +11,7 @@ import com.authservice.auth.dto.auth.AuthUpdateCustomerRequestDto;
 import com.authservice.auth.entity.Role;
 import com.authservice.auth.entity.User;
 import com.authservice.auth.enums.AuthError;
-import com.authservice.auth.exception.AuthException;
+import com.authservice.auth.exception.GeneralException;
 import com.authservice.auth.jwt.JwtUtil;
 import com.authservice.auth.repository.UserRepository;
 import com.authservice.auth.service.UserService;
@@ -91,7 +91,7 @@ public class AuthenticationCustomerService {
             
             user = userService.createUser(user);
             // TODO: las carteras se crean al unir al usuario al negocio
-        } catch(AuthException e) {
+        } catch(GeneralException e) {
             throw e;
         }
         return generateTokenForUser(user, null);
@@ -106,16 +106,16 @@ public class AuthenticationCustomerService {
         Long id = jwtUtil.getClaim(token, "id", Long.class);
 
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new AuthException(AuthError.USER_NOT_FOUND));
+            .orElseThrow(() -> new GeneralException(AuthError.USER_NOT_FOUND));
 
         if (user.getRole() != Role.CUSTOMER) {
-            throw new AuthException(AuthError.INVALID_ROLE_UPDATE_CUSTOMER);
+            throw new GeneralException(AuthError.INVALID_ROLE_UPDATE_CUSTOMER);
         }
 
         // Username
         if (request.getUsername() != null) {
             if (request.getUsername().isBlank()) {
-                throw new AuthException(AuthError.INVALID_USER_DATA);
+                throw new GeneralException(AuthError.INVALID_USER_DATA);
             }
             user.setUsername(request.getUsername());
         }
@@ -123,7 +123,7 @@ public class AuthenticationCustomerService {
         // Password (SIEMPRE encode)
         if (request.getPassword() != null) {
             if (request.getPassword().isBlank()) {
-                throw new AuthException(AuthError.INVALID_PASSWORD);
+                throw new GeneralException(AuthError.INVALID_PASSWORD);
             }
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
@@ -157,11 +157,11 @@ public class AuthenticationCustomerService {
             return generateTokenForUser(dbUser, null);
 
         } catch (BadCredentialsException | UsernameNotFoundException e) {
-            throw new AuthException(AuthError.INVALID_CREDENTIALS);
+            throw new GeneralException(AuthError.INVALID_CREDENTIALS);
         } catch (DataAccessException e) {
-            throw new AuthException(AuthError.DATABASE_ERROR);
+            throw new GeneralException(AuthError.DATABASE_ERROR);
         } catch (Exception e) {
-            throw new AuthException(AuthError.ERROR_LOGIN_CUSTOMER);
+            throw new GeneralException(AuthError.ERROR_LOGIN_CUSTOMER);
         }
     }
     // =========================================================

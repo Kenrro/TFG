@@ -1,5 +1,6 @@
 package com.authservice.auth.exception;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,9 +22,9 @@ import com.authservice.auth.dto.errors.ErrorDto;
 @ControllerAdvice
 public class GlabalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(AuthException.class)
+    @ExceptionHandler(GeneralException.class)
     private ResponseEntity<?> authExceptionHandler(
-        AuthException ex,
+        GeneralException ex,
         WebRequest request
     ) {
         ErrorDto errorDto = ErrorDto.builder()
@@ -54,5 +55,18 @@ public class GlabalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("timestamp", LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDto> handleGeneric(Exception ex) {
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(
+                ErrorDto.builder()
+                    .from("Internal service")
+                    .timestamp(LocalDate.now())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR.name())
+                    .message("Unexpected error")
+                    .build()
+            );
     }
 }

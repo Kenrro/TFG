@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentRequestDto;
 import com.stablishmentservice.stablishmentservice.entity.Stablishment;
 import com.stablishmentservice.stablishmentservice.enums.StablishmentError;
-import com.stablishmentservice.stablishmentservice.exception.StablishmentGeneralException;
+import com.stablishmentservice.stablishmentservice.exception.GeneralException;
 import com.stablishmentservice.stablishmentservice.repository.StablishmentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class StablishmentCRUDService {
     public Stablishment findById(Long id) {
         return stablishmentRepository.findById(id)
             .orElseThrow(() ->
-                new StablishmentGeneralException(
+                new GeneralException(
                     StablishmentError.STABLISHMENT_NOT_FOUND
                 )
             );
@@ -33,7 +33,7 @@ public class StablishmentCRUDService {
     public Stablishment findByCode(String code) {
         return stablishmentRepository.findByCode(code)
             .orElseThrow(() ->
-                new StablishmentGeneralException(
+                new GeneralException(
                     StablishmentError.STABLISHMENT_NOT_FOUND
                 )
             );

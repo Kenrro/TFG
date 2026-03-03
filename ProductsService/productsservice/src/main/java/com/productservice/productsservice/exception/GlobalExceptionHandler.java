@@ -2,6 +2,7 @@ package com.productservice.productsservice.exception;
 
 import java.time.LocalDate;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,8 +14,8 @@ import com.productservice.productsservice.dto.errors.ErrorDto;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(ProductGeneralException.class)
-    public ResponseEntity<ErrorDto> handleStablishmentGeneralException(ProductGeneralException ex) {
+    @ExceptionHandler(GeneralException.class)
+    public ResponseEntity<ErrorDto> handleStablishmentGeneralException(GeneralException ex) {
         ErrorDto errorDto = ErrorDto.builder()
                 .from(ex.getFrom())
                 .timestamp(LocalDate.now())
@@ -23,5 +24,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .build();
         System.out.println(errorDto);
         return ResponseEntity.status(ex.getHttpStatus()).body(errorDto);
+    }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDto> handleGeneric(Exception ex) {
+        ex.printStackTrace();
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(
+                ErrorDto.builder()
+                    .from("Internal service")
+                    .timestamp(LocalDate.now())
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR.name())
+                    .message("Unexpected error")
+                    .build()
+            );
     }
 }

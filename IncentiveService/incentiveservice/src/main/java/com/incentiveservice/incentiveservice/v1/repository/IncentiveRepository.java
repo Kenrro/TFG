@@ -21,7 +21,7 @@ public interface IncentiveRepository extends JpaRepository<Incentive, Long>{
     @Transactional
     @Modifying
     @Query("DELETE FROM Incentive i WHERE i.stablishmentCode = :stablishmentCode")
-    void deleteAllByStablishmentCode(@Param("stablishment_code") String stablihsmentCode);
+    void deleteAllByStablishmentCode(@Param("stablishmentCode") String stablihsmentCode);
 
     @Query("DELETE FROM Incentive i WHERE i.productId = :productId")
     void deleteByProductId(Long productId);

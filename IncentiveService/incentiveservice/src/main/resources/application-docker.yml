@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://incentive-db:5432/incentive_db
+    driver-class-name: org.postgresql.Driver
+    username: incentive_user
+    password: incentive_pass
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+app:
+  servicescredential:
+    apiUrl: http://auth-service:8080/api-key/get-public-key
+    authServiceUrl: http://auth-service:8080/api/auth/
+    productServiceUrl: http://product-service:8080/products
+    incentive-service-user-points-url: http://incentive-service:8080/v1/user-points
+    incentive-service-stablishment-configuration-url: http://incentive-service:8080/v1/stablishment-configurations

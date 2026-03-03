@@ -10,19 +10,22 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.stablishmentservice.stablishmentservice.dto.errors.ErrorDto;
 
+import lombok.extern.slf4j.Slf4j;
 
-@ControllerAdvice
+
+@RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(StablishmentGeneralException.class)
-    public ResponseEntity<ErrorDto> handleStablishmentGeneralException(StablishmentGeneralException ex) {
+    @ExceptionHandler(GeneralException.class)
+    public ResponseEntity<ErrorDto> handleStablishmentGeneralException(GeneralException ex) {
         ErrorDto errorDto = ErrorDto.builder()
                 .from(ex.getFrom())
                 .timestamp(LocalDate.now())
@@ -54,5 +57,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
     
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDto> handleGeneric(Exception ex) {
+        log.error("Unhandled exception", ex);
+
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(
+                ErrorDto.builder()
+                    .from("Internal service")
+                    .timestamp(LocalDate.now())
+                    .status("500")
+                    .message("Unexpected error")
+                    .build()
+            );
+}
 
 }

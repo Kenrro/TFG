@@ -6,40 +6,46 @@ import com.stablishmentservice.stablishmentservice.dto.errors.ErrorDto;
 import com.stablishmentservice.stablishmentservice.enums.IError;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
+@RequiredArgsConstructor
 @Data
-public class StablishmentGeneralException extends RuntimeException {
+@EqualsAndHashCode(callSuper = false)
+public class GeneralException extends RuntimeException{
+
     private final String from;
-    private final String message;
     private final HttpStatus httpStatus;
-    
-    public <T extends IError> StablishmentGeneralException(T error) {
+
+    public <T extends IError> GeneralException(T error) {
         super(error.getMessage());
-        this.from = "Stablishment service";
+        this.from = "Stablishment Service";
         this.httpStatus = error.getHttpStatus();
-        this.message = error.getMessage();
-    }   
-    public StablishmentGeneralException(ErrorDto errorDto) {
+    }
+    public <T extends IError> GeneralException(T error, Throwable cause) {
+        super(error.getMessage(), cause);
+        this.from = "Stablishment Service";
+        this.httpStatus = error.getHttpStatus();
+        log.error("❌ Request interrupted by the following error {}", cause);
+    }
+
+    public GeneralException(ErrorDto errorDto) {
         super(errorDto.getMessage());
         this.from = errorDto.getFrom();
-        this.message = errorDto.getMessage();
         this.httpStatus = HttpStatus.resolve(parseStatus(errorDto.getStatus()));
     }
 
-    // Método auxiliar para parsear
     private int parseStatus(String status) {
         try {
-            // Si es un número: "404" -> 404
             return Integer.parseInt(status);
         } catch (NumberFormatException e) {
-            // Si es un nombre: "NOT_FOUND" -> HttpStatus.NOT_FOUND.value()
             try {
                 return HttpStatus.valueOf(status).value();
             } catch (IllegalArgumentException ex) {
-                // default a INTERNAL_SERVER_ERROR si falla
                 return HttpStatus.INTERNAL_SERVER_ERROR.value();
             }
         }
     }
-
 }

@@ -14,7 +14,7 @@ import org.springframework.data.repository.query.Param;
 @Repository
 public interface StablishmentRepository extends JpaRepository<Stablishment, Long> {
     @Query("SELECT s.code FROM Stablishment s WHERE s.code LIKE CONCAT(:prefix, '%') ORDER BY s.code DESC")
-    String findLastCodeByPrefix(@Param("prefix") String prefix);
+    List<String> findLastCodeByPrefix(@Param("prefix") String prefix);
 
     boolean existsByCode(String code);
 

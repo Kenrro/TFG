@@ -1,46 +1,27 @@
 server:
-  port: 8081
+  port: 8080
   error:
     include-message: always
 
 spring:
   application:
-    name: Authorization-service
-
-  datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: ""
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    name: authorization-service
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
     show-sql: true
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka
 
 app:
   jwt:
     secret:
       private: |
         MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDrbo7yPDcrI86EfOiYg2oDti6PLaSbQJSqOBJElkXcdzJJsFFYBIyo621fe1nAOQAwRD2gsvmBXpLmRE3UcWUbej1uGi/3TcLmmJcFVKt/8GWCv0yiv+Mg2v8fBcdoUCDsumyO0Fcz/jxQysMD6vQZZ6MQ0jG20LyfJzp/mfa3KiRlgC/BcTHmpQbtu0M/IBZtLM+h+Ed91Buf22L80Q5SKf/4HS/QN1odMJGjRM+QIpD56pDF3a9scQ/9yco2STORPRTwizotNiU6XJPrnergJKfkDlfK8RDfTLnP/LxWAkkRCtsp5G0+s6PiYgs23VBNEgDn7ynx47e7/Pshv/dTAgMBAAECggEALK/iCyGZ2SLlRqmM3rIG8+hnIv8nYN6buUmGUiVx4jxvu6PvdLT8W+2/52E68mz/V6oERpXiHQet+24YlcvmRJZpxZXL5/WHGoz5EWZ2XQTsx6n26mdgvbJDvYgzxt16umRSSbNK8g/+M9mgtYQpzA6rWXyEOi6Ztt3T0TeQqEhGu1jMY/agNLNXd3Gp5psVe71Eta1/T3+ZTbOZ/p2xFDe0SF4+5T9vQdYxpQGb9sL8td5prr9ye69Tv4H8aUqjmp9BPnAAkPtRiI4NLgEckPS1OTdxIaWdG7p4npaqLPSdZlnAkwWxTzi1FmuxA2t0LY7Wah4r0s3gg0uY1YMx0QKBgQD91yhIypOm0Z7j+T7A0kDODShzYhKohd6Y1Zk2EWSmLbXtGw6su5sLC8Da4lcEm9V2xX9FF1Tt+E6EeuIIIH5/Ys2JU3UTLc4cmVfKi00OSAjYdw5098LT2zbwM8HuR5bB/txKV9J/LnNBluQXjwI/+0sIwIEiaia/eD+qLgjdMQKBgQDtb08HCuOXGAm0I2UX0+I76vHcPt0cjkOYEC3+PZgP+zIdtRxwYlKaV7zBB23sCeaGHexO4Ouymk3A04LD8R4v6TAxnXOvwoDfe4/jv3MK//KbL54TBUGMC338NtvoK1v48E4DTJ24ago7j7ptIoLGdYDLIHOY75lsGolxUkxrwwKBgGZ9YeGKEXWwe2P2tdSqz8miXGvB9GCgtJCm5ZaEDUxfdm4Gl7U8hkw+cZ6u9o2A0f6DnXBrDDqNID6zUuIPJKQQY4aH8OROgULg0yaPegxDH3cvEuI9Sye5AgSYETxBIWiwm4dU0EPToGuiHfQ5JKJqtxAQkdMwYva5+ZKfxapxAoGAV93SVBvef6LgrG5Q0hGSbnQSz1vgPdoT/6k1LBolNPzT3hSRErIAOafwbUrPjgNX8RgPxF0OPIlH7u0XPmXzsu1L7YCEOG31fT7fz/ugmlh/sphbmlRennH+TKEMno21OpnLdQMcdwue/82/wvV7ifAgGovG27kHgO8NIAfByjsCgYAFCZh6xQaJtpP0QqztLlgLJ5BfENpfdKyXJy+EuIaeXA6qz/hKMYQjBPY2tCTLIlihnNHpUkZhGFEbx0d9p2kzBScbc+EaNWEgltbEZVYLRaciZfLm93RwfmLXrESSbgQqbH3eDj/4ARja06sWzIB4P5NDTOjEwPToM1xSgjDuPA==
+
       public: |
         MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA626O8jw3KyPOhHzomINqA7Yujy2km0CUqjgSRJZF3HcySbBRWASMqOttX3tZwDkAMEQ9oLL5gV6S5kRN1HFlG3o9bhov903C5piXBVSrf/Blgr9Mor/jINr/HwXHaFAg7LpsjtBXM/48UMrDA+r0GWejENIxttC8nyc6f5n2tyokZYAvwXEx5qUG7btDPyAWbSzPofhHfdQbn9ti/NEOUin/+B0v0DdaHTCRo0TPkCKQ+eqQxd2vbHEP/cnKNkkzkT0U8Is6LTYlOlyT653q4CSn5A5XyvEQ30y5z/y8VgJJEQrbKeRtPrOj4mILNt1QTRIA5+8p8eO3u/z7Ib/3UwIDAQAB
     expiration-ms: 86400000
 
   servicescredential:
     password: servicepass
-  microservices:
-    establishment-service-stablishment-url: http://localhost:8080/stablishments
-    establishment-service-userstablishment-url: http://localhost:8080/user-stablishments
-    incentives-service-url: http://localhost:8080/user-points/v1
+

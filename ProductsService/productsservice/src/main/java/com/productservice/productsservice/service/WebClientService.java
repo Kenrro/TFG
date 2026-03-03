@@ -4,11 +4,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 import com.productservice.productsservice.dto.errors.ErrorDto;
 import com.productservice.productsservice.enums.ProductError;
-import com.productservice.productsservice.exception.ProductGeneralException;
+import com.productservice.productsservice.exception.GeneralException;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -27,19 +27,32 @@ public class WebClientService {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                     response.bodyToMono(ErrorDto.class)
-                            .flatMap(errorBody -> Mono.error(new ProductGeneralException(errorBody)))
+                    .switchIfEmpty(
+                            Mono.error(
+                                new GeneralException(
+                                    ErrorDto.builder()
+                                        .from("remote service")
+                                        .status(String.valueOf(response.statusCode().value()))
+                                        .message("Remote service returned error without body")
+                                        .build()
+                                )
+                            )
+                        )
+                            .flatMap(errorBody -> Mono.error(new GeneralException(errorBody)))
                 )
                 .bodyToMono(responseType)
                 .block();
 
-        } catch (ProductGeneralException ex) {
-            throw ex;
-        } catch (WebClientResponseException ex) {
-            throw new ProductGeneralException(
-                ProductError.SERVICE_COMMUNICATION_FAILED);
+        } catch (GeneralException e) {
+            throw e;
+        } 
+        catch (WebClientRequestException  ex) {
+            throw new GeneralException(
+                ProductError.SERVICE_COMMUNICATION_FAILED, ex);
         } catch (Exception ex) {
-            throw new ProductGeneralException(
-                ProductError.UNEXPECTED_ERROR);
+            throw new GeneralException(
+                ProductError.UNEXPECTED_ERROR, ex
+            );
         }
     }
 
@@ -52,19 +65,32 @@ public class WebClientService {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                     response.bodyToMono(ErrorDto.class)
-                            .flatMap(errorBody -> Mono.error(new ProductGeneralException(errorBody)))
+                    .switchIfEmpty(
+                            Mono.error(
+                                new GeneralException(
+                                    ErrorDto.builder()
+                                        .from("remote service")
+                                        .status(String.valueOf(response.statusCode().value()))
+                                        .message("Remote service returned error without body")
+                                        .build()
+                                )
+                            )
+                        )
+                            .flatMap(errorBody -> Mono.error(new GeneralException(errorBody)))
                 )
                 .bodyToMono(responseType)
                 .block();
 
-        } catch (ProductGeneralException ex) {
-            throw ex;
-        } catch (WebClientResponseException ex) {
-            throw new ProductGeneralException(
-                ProductError.SERVICE_COMMUNICATION_FAILED);
+        } catch (GeneralException e) {
+            throw e;
+        } 
+        catch (WebClientRequestException  ex) {
+            throw new GeneralException(
+                ProductError.SERVICE_COMMUNICATION_FAILED, ex);
         } catch (Exception ex) {
-            throw new ProductGeneralException(
-                ProductError.UNEXPECTED_ERROR);
+            throw new GeneralException(
+                ProductError.UNEXPECTED_ERROR, ex
+            );
         }
     }
 
@@ -76,19 +102,31 @@ public class WebClientService {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                     response.bodyToMono(ErrorDto.class)
-                            .flatMap(errorBody -> Mono.error(new ProductGeneralException(errorBody)))
+                    .switchIfEmpty(
+                            Mono.error(
+                                new GeneralException(
+                                    ErrorDto.builder()
+                                        .from("remote service")
+                                        .status(String.valueOf(response.statusCode().value()))
+                                        .message("Remote service returned error without body")
+                                        .build()
+                                )
+                            )
+                        )
+                            .flatMap(errorBody -> Mono.error(new GeneralException(errorBody)))
                 )
                 .bodyToMono(responseType)
                 .block();
 
-        } catch (ProductGeneralException ex) {
-            throw ex;
-        } catch (WebClientResponseException ex) {
-            throw new ProductGeneralException(
-                ProductError.SERVICE_COMMUNICATION_FAILED);
+        } catch (GeneralException e) {
+            throw e;
+        } 
+        catch (WebClientRequestException  ex) {
+            throw new GeneralException(
+                ProductError.SERVICE_COMMUNICATION_FAILED, ex);
         } catch (Exception ex) {
-            throw new ProductGeneralException(
-                ProductError.UNEXPECTED_ERROR );
+            throw new GeneralException(ProductError.UNEXPECTED_ERROR, ex);
         }
     }
 }
+

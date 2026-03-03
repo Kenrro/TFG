@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://auth-db:5432/auth_db
+    driver-class-name: org.postgresql.Driver
+    username: auth_user
+    password: auth_pass
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update   # o create en desarrollo
+    show-sql: true
+
+app:
+  microservices:
+    establishment-service-stablishment-url: http://stablishment-service:8080/stablishments
+    establishment-service-userstablishment-url: http://stablishment-service:8080/user-stablishments
+    incentives-service-url: http://incentive-service:8080/v1/user-points

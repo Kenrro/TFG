@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.stablishmentservice.stablishmentservice.entity.UserStablishment;
 import com.stablishmentservice.stablishmentservice.enums.UserStablishmentError;
-import com.stablishmentservice.stablishmentservice.exception.StablishmentGeneralException;
+import com.stablishmentservice.stablishmentservice.exception.GeneralException;
 import com.stablishmentservice.stablishmentservice.repository.UserStablishmentRepository;
 
 import jakarta.transaction.Transactional;
@@ -22,7 +22,7 @@ public class UserStablishmentCRUDService {
 
     public UserStablishment getByEmployeeId(Long userId) {
         return userStablishmentRepository.findByEmployeeId(userId).orElseThrow(()->
-        new StablishmentGeneralException(UserStablishmentError.USER_STABLISHMENT_RELATION_NOT_FOUND));
+        new GeneralException(UserStablishmentError.USER_STABLISHMENT_RELATION_NOT_FOUND));
     }
     public List<UserStablishment> getByUserId(Long userId) {
         return userStablishmentRepository.findByUserId(userId);
@@ -42,20 +42,20 @@ public class UserStablishmentCRUDService {
             int deleted = userStablishmentRepository.deleteByStablishmentId(stablishmentId);
 
             if (deleted == 0) {
-                throw new StablishmentGeneralException(
+                throw new GeneralException(
                     UserStablishmentError.USER_STABLISHMENT_RELATION_NOT_FOUND
                 );
             }
 
         } catch (DataIntegrityViolationException e) {
-            throw new StablishmentGeneralException(
+            throw new GeneralException(
                 UserStablishmentError.USER_STABLISHMENT_RELATION_DELETION_FAILED);
 
-        } catch (StablishmentGeneralException e) {
+        } catch (GeneralException e) {
             throw e; // no la envuelvas de nuevo
 
         } catch (Exception e) {
-            throw new StablishmentGeneralException(
+            throw new GeneralException(
                 UserStablishmentError.USER_STABLISHMENT_RELATION_DELETION_FAILED);
         }
     }
@@ -65,14 +65,14 @@ public class UserStablishmentCRUDService {
         try {
             deleted = userStablishmentRepository.deleteByUserId(userId);
         } catch (DataIntegrityViolationException e) {
-            throw new StablishmentGeneralException(
+            throw new GeneralException(
                 UserStablishmentError.USER_STABLISHMENT_RELATION_DELETION_FAILED);
 
-        } catch (StablishmentGeneralException e) {
+        } catch (GeneralException e) {
             throw e;
 
         } catch (Exception e) {
-            throw new StablishmentGeneralException(
+            throw new GeneralException(
                 UserStablishmentError.USER_STABLISHMENT_RELATION_DELETION_FAILED);
         }
         return deleted;
@@ -83,20 +83,20 @@ public class UserStablishmentCRUDService {
             int deleted = userStablishmentRepository.deleteByUsertIdAndStablishmentId(userId, stablishmentId);
 
             if (deleted == 0) {
-                throw new StablishmentGeneralException(
+                throw new GeneralException(
                     UserStablishmentError.USER_STABLISHMENT_RELATION_NOT_FOUND
                 );
             }
 
         } catch (DataIntegrityViolationException e) {
-            throw new StablishmentGeneralException(
+            throw new GeneralException(
                 UserStablishmentError.USER_STABLISHMENT_RELATION_DELETION_FAILED);
 
-        } catch (StablishmentGeneralException e) {
+        } catch (GeneralException e) {
             throw e;
 
         } catch (Exception e) {
-            throw new StablishmentGeneralException(
+            throw new GeneralException(
                 UserStablishmentError.USER_STABLISHMENT_RELATION_DELETION_FAILED);
         }
     }
@@ -110,9 +110,9 @@ public class UserStablishmentCRUDService {
             userStablishmentRepository.save(userStablishment);
         } catch (DataIntegrityViolationException e) {
             e.printStackTrace();
-            throw new StablishmentGeneralException(UserStablishmentError.INVALID_USER_STABLISHMENT_DATA);
+            throw new GeneralException(UserStablishmentError.INVALID_USER_STABLISHMENT_DATA);
         } catch (ConstraintViolationException e) {
-            throw new StablishmentGeneralException(UserStablishmentError.INTERNAL_SERVER_ERROR);
+            throw new GeneralException(UserStablishmentError.INTERNAL_SERVER_ERROR);
         }
     }
     @Transactional

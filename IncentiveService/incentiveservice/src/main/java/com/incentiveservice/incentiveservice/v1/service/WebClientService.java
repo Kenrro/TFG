@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 import com.incentiveservice.incentiveservice.v1.dto.errors.ErrorDto;
 import com.incentiveservice.incentiveservice.v1.enums.IncentiveError;
@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono;
 public class WebClientService {
 
     @Qualifier("securedWebClient") private final WebClient securedWebClient;
+
     public <T> T secureGetMethod(String uri, Class<T> responseType, Object... uriVariables) {
         try {
 
@@ -26,19 +27,32 @@ public class WebClientService {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                     response.bodyToMono(ErrorDto.class)
+                    .switchIfEmpty(
+                            Mono.error(
+                                new GeneralException(
+                                    ErrorDto.builder()
+                                        .from("remote service")
+                                        .status(String.valueOf(response.statusCode().value()))
+                                        .message("Remote service returned error without body")
+                                        .build()
+                                )
+                            )
+                        )
                             .flatMap(errorBody -> Mono.error(new GeneralException(errorBody)))
                 )
                 .bodyToMono(responseType)
                 .block();
 
-        } catch (GeneralException ex) {
-            throw ex;
-        } catch (WebClientResponseException ex) {
+        } catch (GeneralException e) {
+            throw e;
+        } 
+        catch (WebClientRequestException  ex) {
             throw new GeneralException(
-                IncentiveError.SERVICE_COMMUNICATION_FAILED);
+                IncentiveError.SERVICE_COMMUNICATION_FAILED, ex);
         } catch (Exception ex) {
             throw new GeneralException(
-                IncentiveError.UNEXPECTED_ERROR);
+                IncentiveError.UNEXPECTED_ERROR, ex
+            );
         }
     }
 
@@ -51,19 +65,32 @@ public class WebClientService {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                     response.bodyToMono(ErrorDto.class)
+                    .switchIfEmpty(
+                            Mono.error(
+                                new GeneralException(
+                                    ErrorDto.builder()
+                                        .from("remote service")
+                                        .status(String.valueOf(response.statusCode().value()))
+                                        .message("Remote service returned error without body")
+                                        .build()
+                                )
+                            )
+                        )
                             .flatMap(errorBody -> Mono.error(new GeneralException(errorBody)))
                 )
                 .bodyToMono(responseType)
                 .block();
 
-        } catch (GeneralException ex) {
-            throw ex;
-        } catch (WebClientResponseException ex) {
+        } catch (GeneralException e) {
+            throw e;
+        } 
+        catch (WebClientRequestException  ex) {
             throw new GeneralException(
-                IncentiveError.SERVICE_COMMUNICATION_FAILED);
+                IncentiveError.SERVICE_COMMUNICATION_FAILED, ex);
         } catch (Exception ex) {
             throw new GeneralException(
-                IncentiveError.UNEXPECTED_ERROR);
+                IncentiveError.UNEXPECTED_ERROR, ex
+            );
         }
     }
 
@@ -75,19 +102,31 @@ public class WebClientService {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                     response.bodyToMono(ErrorDto.class)
+                    .switchIfEmpty(
+                            Mono.error(
+                                new GeneralException(
+                                    ErrorDto.builder()
+                                        .from("remote service")
+                                        .status(String.valueOf(response.statusCode().value()))
+                                        .message("Remote service returned error without body")
+                                        .build()
+                                )
+                            )
+                        )
                             .flatMap(errorBody -> Mono.error(new GeneralException(errorBody)))
                 )
                 .bodyToMono(responseType)
                 .block();
 
-        } catch (GeneralException ex) {
-            throw ex;
-        } catch (WebClientResponseException ex) {
+        } catch (GeneralException e) {
+            throw e;
+        } 
+        catch (WebClientRequestException  ex) {
             throw new GeneralException(
-                IncentiveError.SERVICE_COMMUNICATION_FAILED);
+                IncentiveError.SERVICE_COMMUNICATION_FAILED, ex);
         } catch (Exception ex) {
-            throw new GeneralException(
-                IncentiveError.UNEXPECTED_ERROR );
+            throw new GeneralException(IncentiveError.UNEXPECTED_ERROR, ex);
         }
     }
 }
+

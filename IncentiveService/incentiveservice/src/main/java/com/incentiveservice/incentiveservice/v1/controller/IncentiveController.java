@@ -381,7 +381,7 @@ public class IncentiveController {
         }
     )
     @Hidden
-    @PreAuthorize("hasAuthority('SERVICE')")
+    @PreAuthorize("hasRole('SERVICE')")
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/delete-by-stablishment/{stablishmentCode}")
     public ResponseEntity<Void> deleteByCode(

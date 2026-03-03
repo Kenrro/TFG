@@ -18,7 +18,7 @@ import com.authservice.auth.dto.stablisment.UsersIdsRequestDto;
 import com.authservice.auth.entity.Role;
 import com.authservice.auth.entity.User;
 import com.authservice.auth.enums.AuthError;
-import com.authservice.auth.exception.AuthException;
+import com.authservice.auth.exception.GeneralException;
 import com.authservice.auth.jwt.JwtUtil;
 import com.authservice.auth.repository.UserRepository;
 import com.authservice.auth.service.UserService;
@@ -118,14 +118,14 @@ public class AuthenticationEmployeeService {
                 Void.class);
             // send dto and if error delete user created before
 
-        } catch(AuthException e){
+        } catch(GeneralException e){
             userService.deleteById(user.getId());
             throw e;
         } 
         catch(Exception e){
             e.printStackTrace();
             userService.deleteById(user.getId());
-            throw new AuthException(AuthError.ERROR_CREATING_USER);
+            throw new GeneralException(AuthError.ERROR_CREATING_USER);
         }
     }
         // Get stablishment code from userStablishmentService
@@ -141,7 +141,7 @@ public class AuthenticationEmployeeService {
 
             // find admin user in db
             User admin = userRepository.findByUsername(username)
-                .orElseThrow(() -> new AuthException(AuthError.USER_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(AuthError.USER_NOT_FOUND));
             // get stablishment code from stablishment service
             long adminId = admin.getId();
             return getEstablishmentCode(adminId);
@@ -184,13 +184,13 @@ public class AuthenticationEmployeeService {
             user = (User) auth.getPrincipal();
             code = getEstablishmentCode(user.getId());
             if (!code.equals(request.getEstablishmentCode())) {
-                throw new AuthException(AuthError.ACCESS_DENIED);
+                throw new GeneralException(AuthError.ACCESS_DENIED);
             }
         } catch (BadCredentialsException | UsernameNotFoundException e) {
             e.printStackTrace();
-            throw new AuthException(AuthError.INVALID_CREDENTIALS);
+            throw new GeneralException(AuthError.INVALID_CREDENTIALS);
         } catch (DataAccessException e) {
-            throw new AuthException(AuthError.DATABASE_ERROR);
+            throw new GeneralException(AuthError.DATABASE_ERROR);
         } 
         
         return generateTokenForUser(user, code);
@@ -201,7 +201,7 @@ public class AuthenticationEmployeeService {
     @Transactional
     public void updateEmployee(Long id, AuthUpdateCustomerRequestDto request) {
         if (request.getRole() != null && request.getRole() != Role.ADMIN && request.getRole() != Role.SELLER) {
-            throw new AuthException(AuthError.INVALID_ROLE_UPDATE_EMPLOYEE);
+            throw new GeneralException(AuthError.INVALID_ROLE_UPDATE_EMPLOYEE);
         }
         User user = userService.findById(id);
 

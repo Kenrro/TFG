@@ -10,7 +10,7 @@ import com.productservice.productsservice.dto.products.DeleteProductResponsetDto
 import com.productservice.productsservice.dto.products.ProductCreateRequestDto;
 import com.productservice.productsservice.entity.Product;
 import com.productservice.productsservice.enums.ProductError;
-import com.productservice.productsservice.exception.ProductGeneralException;
+import com.productservice.productsservice.exception.GeneralException;
 import com.productservice.productsservice.repository.ProductRepository;
 
 import jakarta.transaction.Transactional;
@@ -37,11 +37,11 @@ public class ProductCRUDService {
         try {
             productRepository.save(product);
         } catch (DataIntegrityViolationException e) {
-            throw new ProductGeneralException(ProductError.PRODUCT_ALREADY_EXISTS);
+            throw new GeneralException(ProductError.PRODUCT_ALREADY_EXISTS);
         } catch (ConstraintViolationException e) {
-            throw new ProductGeneralException(ProductError.INVALID_PRODUCT_DATA);
+            throw new GeneralException(ProductError.INVALID_PRODUCT_DATA);
         } catch (DataAccessException e) {
-            throw new ProductGeneralException(ProductError.PRODUCT_CREATION_FAILED);
+            throw new GeneralException(ProductError.PRODUCT_CREATION_FAILED);
         }
 
     }
@@ -62,18 +62,18 @@ public class ProductCRUDService {
         try {
             productRepository.saveAll(products);
         } catch (DataIntegrityViolationException e) {
-            throw new ProductGeneralException(ProductError.PRODUCT_ALREADY_EXISTS);
+            throw new GeneralException(ProductError.PRODUCT_ALREADY_EXISTS);
         } catch (ConstraintViolationException e) {
-            throw new ProductGeneralException(ProductError.INVALID_PRODUCT_DATA);
+            throw new GeneralException(ProductError.INVALID_PRODUCT_DATA);
         } catch (DataAccessException e) {
-            throw new ProductGeneralException(ProductError.PRODUCT_CREATION_FAILED);
+            throw new GeneralException(ProductError.PRODUCT_CREATION_FAILED);
         }
 
     }
 
     public Product findById(Long Id) {
         return productRepository.findById(Id)
-        .orElseThrow(()-> new ProductGeneralException(ProductError.PRODUCT_NOT_FOUND));
+        .orElseThrow(()-> new GeneralException(ProductError.PRODUCT_NOT_FOUND));
 
     }
     public List<Product> findAllByStablishmentCode(String stablishmentCode) {
@@ -83,7 +83,7 @@ public class ProductCRUDService {
     public void updateProduct(Long id, ProductCreateRequestDto request) {
         // 1. Obtener el producto existente
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductGeneralException(ProductError.PRODUCT_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ProductError.PRODUCT_NOT_FOUND));
 
         // 2. Obtener todas las propiedades del DTO
         Field[] fields = ProductCreateRequestDto.class.getDeclaredFields();
@@ -118,10 +118,10 @@ public class ProductCRUDService {
     public void deleteById(Long id, String code) {
         // Primero verificamos si existe el producto
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductGeneralException(ProductError.PRODUCT_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ProductError.PRODUCT_NOT_FOUND));
         
         if (!code.equals(product.getStablishmentCode())) {
-            throw new ProductGeneralException(ProductError.UNAUTHORIZED_PRODUCT_ACCESS);
+            throw new GeneralException(ProductError.UNAUTHORIZED_PRODUCT_ACCESS);
         }
 
         // Borramos

@@ -1,0 +1,116 @@
+version: "3.9"
+
+services:
+
+  auth-db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+
+  auth-service:
+    build: ./AuthorizationService/auth
+    ports:
+      - "8081:8080"
+    depends_on:
+      - auth-db
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  stablishment-db:
+    image: postgres:15
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: stablishment_db
+      POSTGRES_USER: stablishment_user
+      POSTGRES_PASSWORD: stablishment_pass
+    volumes:
+      - stablishment_db_data:/var/lib/postgresql/data
+
+  stablishment-service:
+    build: ./StablishmentService/stablishmentservice
+    ports:
+      - "8080:8080"
+    depends_on:
+      - stablishment-db
+      - auth-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  product-db:
+    image: postgres:15
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: product_db
+      POSTGRES_USER: product_user
+      POSTGRES_PASSWORD: product_pass
+    volumes:
+      - product_db_data:/var/lib/postgresql/data
+
+  product-service:
+    build: ./ProductsService/productsservice
+    ports:
+      - "8082:8080"
+    depends_on:
+      - product-db
+      - auth-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  incentive-db:
+    image: postgres:15
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: incentive_db
+      POSTGRES_USER: incentive_user
+      POSTGRES_PASSWORD: incentive_pass
+    volumes:
+      - incentive_db_data:/var/lib/postgresql/data
+
+  incentive-service:
+    build: ./IncentiveService/incentiveservice
+    ports:
+      - "8083:8080"
+    depends_on:
+      - incentive-db
+      - auth-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  transaction-db:
+    image: postgres:15
+    ports:
+      - "5436:5432"
+    environment:
+      POSTGRES_DB: transaction_db
+      POSTGRES_USER: transaction_user
+      POSTGRES_PASSWORD: transaction_pass
+    volumes:
+      - transaction_db_data:/var/lib/postgresql/data
+
+  transaction-service:
+    build: ./TransacctionService/transactionservice
+    ports:
+      - "8084:8080"
+    depends_on:
+      - transaction-db
+      - auth-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+
+# 👇 ESTO VA FUERA DE services
+volumes:
+  auth_db_data:
+  stablishment_db_data:
+  product_db_data:
+  incentive_db_data:
+  transaction_db_data:

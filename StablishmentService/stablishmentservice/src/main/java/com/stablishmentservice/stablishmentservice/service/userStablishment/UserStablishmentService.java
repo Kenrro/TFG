@@ -11,7 +11,7 @@ import com.stablishmentservice.stablishmentservice.dto.incentive.points.UserPoin
 import com.stablishmentservice.stablishmentservice.dto.incentive.points.UsersPointsDto;
 import com.stablishmentservice.stablishmentservice.entity.UserStablishment;
 import com.stablishmentservice.stablishmentservice.enums.StablishmentError;
-import com.stablishmentservice.stablishmentservice.exception.StablishmentGeneralException;
+import com.stablishmentservice.stablishmentservice.exception.GeneralException;
 import com.stablishmentservice.stablishmentservice.jwt.JwtUtil;
 import com.stablishmentservice.stablishmentservice.repository.StablishmentRepository;
 import com.stablishmentservice.stablishmentservice.service.WebClientService;
@@ -36,7 +36,7 @@ public class UserStablishmentService {
             String stablishmentCode
         ) {
             Long stablishment = stablishmentRepository.findByCode(stablishmentCode)
-                .orElseThrow(() -> new StablishmentGeneralException(StablishmentError.STABLISHMENT_NOT_FOUND))
+                .orElseThrow(() -> new GeneralException(StablishmentError.STABLISHMENT_NOT_FOUND))
                 .getId();
             return stablishment;
         }
@@ -44,7 +44,7 @@ public class UserStablishmentService {
             Long id
         ) {
             String stablishment = stablishmentRepository.findById(id)
-                .orElseThrow(() -> new StablishmentGeneralException(StablishmentError.STABLISHMENT_NOT_FOUND))
+                .orElseThrow(() -> new GeneralException(StablishmentError.STABLISHMENT_NOT_FOUND))
                 .getCode();
             return stablishment;
         }
@@ -75,7 +75,7 @@ public class UserStablishmentService {
         userStablishmentCRUDService.create(userId, stablishmentId);
         try{
             createWalletInIncentiveService(userId, stablishmentCode);
-        } catch (StablishmentGeneralException e) {
+        } catch (GeneralException e) {
             userStablishmentCRUDService.deleteByUsertId(userId);
             throw e;
         }
@@ -107,7 +107,7 @@ public class UserStablishmentService {
 
         try {
             userStablishmentCRUDService.deleteByStablishmentId(id);
-        } catch (StablishmentGeneralException e) {
+        } catch (GeneralException e) {
             rollbackUserPointsDeleting(usersPointsDto);
             throw e;
         }
@@ -123,7 +123,7 @@ public class UserStablishmentService {
         UsersPointsDto usersPointsDto = deleteAllUserPointsToDeleteStablishment(code);
         try {
             userStablishmentCRUDService.deleteByStablishmentId(stablishmentId);
-        } catch (StablishmentGeneralException e) {
+        } catch (GeneralException e) {
             rollbackUserPointsDeleting(usersPointsDto);
             throw e;
         }
@@ -148,7 +148,7 @@ public class UserStablishmentService {
         
         try{
             userStablishmentCRUDService.deleteByUsertId(userId);
-        } catch(StablishmentGeneralException e) {
+        } catch(GeneralException e) {
             rollbackUserPointsDeleting(usersPointsDto);
             throw e;
         }
@@ -255,7 +255,7 @@ public class UserStablishmentService {
 
         try {
             userStablishmentCRUDService.deleteByUsertIdAndStablishmentId(userId, stablishmentId);
-        } catch(StablishmentGeneralException e) {
+        } catch(GeneralException e) {
             rollbackUserPointsDeleting(usersPointsDto);
             throw e;
         }

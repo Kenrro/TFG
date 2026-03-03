@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.stablishmentservice.stablishmentservice.dto.authorization.CreateStablishmentUserResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.authorization.UsersIdsRequestDto;
-import com.stablishmentservice.stablishmentservice.dto.authorization.DeleteUsersResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.authorization.UsersDto;
 import com.stablishmentservice.stablishmentservice.dto.incentive.configuration.StablishmentConfigurationCreateRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.incentive.configuration.StablishmentConfigurationResponseDto;
@@ -20,7 +19,7 @@ import com.stablishmentservice.stablishmentservice.dto.stablishment.Stablishment
 import com.stablishmentservice.stablishmentservice.entity.Stablishment;
 import com.stablishmentservice.stablishmentservice.entity.UserStablishment;
 import com.stablishmentservice.stablishmentservice.enums.StablishmentError;
-import com.stablishmentservice.stablishmentservice.exception.StablishmentGeneralException;
+import com.stablishmentservice.stablishmentservice.exception.GeneralException;
 import com.stablishmentservice.stablishmentservice.jwt.JwtUtil;
 import com.stablishmentservice.stablishmentservice.service.GeneratedRamdonCode;
 import com.stablishmentservice.stablishmentservice.service.WebClientService;
@@ -28,7 +27,9 @@ import com.stablishmentservice.stablishmentservice.service.userStablishment.User
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StablishmentService {
@@ -113,28 +114,35 @@ public class StablishmentService {
                 stablishment.getCode()
             );
         } catch (Exception e) {
-            e.printStackTrace();
-            if (adminId != null) {
-                // rollback created user in authservice
-                webClientService.secureDeleteMethod(
-                    authServiceUrl + "/delete-employee/" + adminId, 
-                    Void.class, 
-                    admin);
-            }
-            if (stablishment != null) {
-                // Delete created stablishment
-                stablishmentCRUDService.delete(stablishment.getId());
-            }
 
-            if (configuration != null) {
-                // Delete configuration
-                webClientService.secureDeleteMethod(
-                    configurationServiceUrl + "/{stablishmentCode}", 
-                    Void.class, 
-                    code);
-            }
-            throw new StablishmentGeneralException(StablishmentError.STABLISHMENT_CREATION_FAILED);
+        // 1️⃣ Si ya es un error de negocio → respétalo
+        if (e instanceof GeneralException ge) {
+            throw ge;
         }
+
+        // 2️⃣ Rollback manual (solo para errores técnicos)
+        if (adminId != null) {
+            webClientService.secureDeleteMethod(
+                authServiceUrl + "/delete-employee/" + adminId,
+                Void.class
+            );
+        }
+
+        if (stablishment != null) {
+            stablishmentCRUDService.delete(stablishment.getId());
+        }
+
+        if (configuration != null) {
+            webClientService.secureDeleteMethod(
+                configurationServiceUrl + "/{stablishmentCode}",
+                Void.class,
+                code
+            );
+        }
+
+        // 3️⃣ Error real inesperado
+        throw new GeneralException(StablishmentError.STABLISHMENT_CREATION_FAILED, e);
+    }
 
         return StablishmentAndAdminResponseDto.builder()
             .name(stablishment.getName())
@@ -187,42 +195,56 @@ public class StablishmentService {
         
             userStablishmentService.deleteUserStablishmentRelationsByStablishmentId(stablishmentId);
             stablishmentCRUDService.delete(stablishmentId);
-        } catch (Exception e) {
-            try {
-                // rollback deleted user
-                if (deleteUsersResponseDto != null) {
-                    webClientService.securePostMethod(authServiceUrl + "/rollback-delete-employees",
-                        deleteUsersResponseDto, 
-                        Void.class);
-                }
-                // rollback deleted relations
-                if (deleteUsersResponseDto != null) {
-                    userStablishmentService.rollbackDeleteStablishment(
-                    deleteUsersResponseDto.getUsers().stream().map(relation -> 
-                        UserStablishment.builder()
-                        .userId(relation.getId())
-                        .stablishmentId(stablishmentId)
-                        .build()      
-                    )
-                    .toList()
-                    );
-                }
-                // rollback deleted products
-                if (deletedProducts != null) {    
-                
-                    webClientService.securePostMethod(productServiceUrl + "/rollback-deleted-products", 
-                    deletedProducts, 
-                    Void.class);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
+        } catch (RuntimeException e) {
+          
+            rollbackSafely(deleteUsersResponseDto, deletedProducts, stablishmentId);
+            
+            if (e instanceof GeneralException ge) {
+                throw ge;
             }
-            throw new StablishmentGeneralException(
-                StablishmentError.STABLISHMENT_DELETION_FAILED
+            throw new GeneralException(
+                StablishmentError.STABLISHMENT_DELETION_FAILED,
+                e
             );
         }
         
     }
+    private void rollbackSafely(
+            UsersDto deletedUsers,
+            DeletedProductsResponseDto deletedProducts,
+            Long stablishmentId
+        ) {
+            try {
+                if (deletedUsers != null) {
+                    webClientService.securePostMethod(
+                        authServiceUrl + "/rollback-delete-employees",
+                        deletedUsers,
+                        Void.class
+                    );
+
+                    userStablishmentService.rollbackDeleteStablishment(
+                        deletedUsers.getUsers().stream()
+                            .map(u -> UserStablishment.builder()
+                                .userId(u.getId())
+                                .stablishmentId(stablishmentId)
+                                .build())
+                            .toList()
+                    );
+                }
+
+                if (deletedProducts != null) {
+                    webClientService.securePostMethod(
+                        productServiceUrl + "/rollback-deleted-products",
+                        deletedProducts,
+                        Void.class
+                    );
+                }
+
+            } catch (RuntimeException rollbackError) {
+                // Log
+                log.error("❌ Rollback failed", rollbackError);
+            }
+        }
     // =========================================================
     // GET STABLISHMENTS BY TOKEN
     // =========================================================
