@@ -1,11 +1,29 @@
-import "../../styles/ui.css"
+import "../../styles/ui.css";
 
-export default function Input({ onChange, ...props }) {
+export default function Input({ value, onChange, error, ...props }) {
+
   const handleChange = (e) => {
-    onChange?.(e.target.value);
+    if (onChange) {
+      onChange(e.target.value);
+    }
   };
 
   return (
-    <input className="ui-input" {...props} onChange={handleChange} />
+    <div className="ui-input-wrapper">
+
+      <input
+        className={`ui-input ${error ? "ui-input-error" : ""}`}
+        value={value}
+        onChange={handleChange}
+        {...props}
+      />
+
+      {error && (
+        <span className="ui-input-error-text">
+          {error}
+        </span>
+      )}
+
+    </div>
   );
 }

@@ -7,6 +7,10 @@ import StaffDashboard from "./pages/staff/StaffDashBoard"
 import ProtectedRoute from "./routes/ProtectedRoute"
 import PublicRoute from "./routes/PublicRoute"
 import CustomerSettings from "./pages/customer/CustomerSettings"
+import CustomerEstablishmentView from "./pages/customer/CustomerEstablishmentView"
+import CustomerScanView from "./pages/customer/CustomerScanView"
+import CustomerRedeemView from "./pages/customer/CustomerRedeemView"
+import JoinEstablishmentView from "./pages/customer/JoinStablishmentView"
 function App() {
 
   return (
@@ -45,6 +49,38 @@ function App() {
         element={
           <ProtectedRoute roles={["CUSTOMER"]}>
             <CustomerSettings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customer/join-establishment"
+        element={
+          <ProtectedRoute roles={["CUSTOMER"]}>
+            <JoinEstablishmentView />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customer/establishment/:code"
+        element={
+          <ProtectedRoute roles={["CUSTOMER"]}>
+            <CustomerEstablishmentView />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customer/scan"
+        element={
+          <ProtectedRoute roles={["CUSTOMER"]}>
+            <CustomerScanView />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customer/redeem"
+        element={
+          <ProtectedRoute roles={["CUSTOMER"]}>
+            <CustomerRedeemView />
           </ProtectedRoute>
         }
       />

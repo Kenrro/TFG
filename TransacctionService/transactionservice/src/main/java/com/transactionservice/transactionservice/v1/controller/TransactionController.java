@@ -118,7 +118,7 @@ public class TransactionController {
     @PostMapping("/redeems")
     public ResponseEntity<TransactionUUIDDto> createRedeemPointsTransaction(
             @RequestBody CreateRedeemTransactionRequestDto requestDto,
-            @RequestHeader String token
+            @RequestHeader("Authorization") String token
     ) {
 
         TransactionUUIDDto uuid =

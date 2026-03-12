@@ -104,22 +104,31 @@ export default function CreateEstablishmentView() {
 
       <ErrorMessage>{error}</ErrorMessage>
 
-      <Input placeholder="Establishment name" onChange={handleChange("name")} />
-      <Input placeholder="Address" onChange={handleChange("address")} />
-      <Input placeholder="Phone" onChange={handleChange("phone")} />
-      <Input placeholder="Email" onChange={handleChange("email")} />
-      <Input placeholder="Description" onChange={handleChange("description")} />
+      <div className="form-container">
 
-      <h3>Admin</h3>
+        <Input placeholder="Establishment name" onChange={handleChange("name")} />
+        <Input placeholder="Address" onChange={handleChange("address")} />
+        <Input placeholder="Phone" onChange={handleChange("phone")} />
+        <Input placeholder="Email" onChange={handleChange("email")} />
+        <Input placeholder="Description" onChange={handleChange("description")} />
 
-      <Input placeholder="Admin username" onChange={handleChange("adminUsername")} />
-      <Input type="password" placeholder="Admin password" onChange={handleChange("adminPassword")} />
-      <Input placeholder="Admin name" onChange={handleChange("adminName")} />
-      <Input placeholder="Admin lastname" onChange={handleChange("adminLastname")} />
+        <h3 className="form-section">Admin</h3>
 
-      <Button loading={loading} onClick={handleSubmit}>
-        Create establishment
-      </Button>
+        <Input placeholder="Admin username" onChange={handleChange("adminUsername")} />
+        <Input type="password" placeholder="Admin password" onChange={handleChange("adminPassword")} />
+        <Input placeholder="Admin name" onChange={handleChange("adminName")} />
+        <Input placeholder="Admin lastname" onChange={handleChange("adminLastname")} />
+        <p className="login__register"> 
+            ¿Eres miembro de un establecimiento?{" "}
+            <span style={{color: "#11f", cursor: "pointer"}} onClick={() => navigate("/login")}>
+              Accede a tu cuenta
+            </span>
+          </p>
+        <Button loading={loading} onClick={handleSubmit}>
+          Create establishment
+        </Button>
+
+      </div>
 
     </AuthLayout>
   );

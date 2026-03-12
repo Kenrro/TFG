@@ -14,4 +14,4 @@ app:
     authServiceUrl: http://auth-service:8080/api/auth/
     establishment-service-stablishment-url: http://stablishment-service:8080/stablishments
     product-service-url: http://product-service:8080/products
-    transaction-process-url: http://transaction-service:8080/v1/transaction-process
+    transaction-process-url: http://incentive-service:8080/v1/transaction-process

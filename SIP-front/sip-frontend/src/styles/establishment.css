@@ -1,0 +1,103 @@
+.establishment-header {
+  margin-bottom: 16px;
+}
+
+.establishment-code {
+  color: #374151;
+  font-size: 14px;
+}
+
+.establishment-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #F3F4F6;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: #2563EB;
+  color: white;
+}
+
+.establishment-content {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.establishment-hero {
+  margin-bottom: 20px;
+}
+
+.establishment-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.establishment-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.incentives-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scan-btn {
+  width: 100%;
+  padding: 14px;
+
+  border-radius: 12px;
+  border: none;
+
+  background: #2563EB;
+  color: white;
+
+  font-weight: 600;
+  font-size: 15px;
+
+  cursor: pointer;
+
+  margin-top: 12px;
+}
+
+.scan-btn:hover {
+  background: #1E3A8A;
+}
+
+.leave-container {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.leave-btn {
+  background: #fee2e2;
+  color: #b91c1c;
+
+  border: none;
+  padding: 10px 16px;
+
+  border-radius: 10px;
+
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.leave-btn:hover {
+  background: #fecaca;
+}

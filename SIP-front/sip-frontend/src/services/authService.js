@@ -1,25 +1,23 @@
-const API = import.meta.env.VITE_API_URL;
+import request from "../api/Request";
+import { API } from "../api/config";
+
+// const API = import.meta.env.VITE_API_URL;
 
 export async function loginCustomer(data) {
-  return request("/login-customer", data);
+  return request(`${API.AUTH}/login-customer`, {"method": "POST", "body": JSON.stringify(data)});
 }
 
 export async function loginEmployee(data) {
-  return request("/login-employee", data);
+  return request(`${API.AUTH}/login-employee`, {"method": "POST", "body": JSON.stringify(data)});
 }
 
 export async function registerCustomer(data) {
-  return request("/register-customer", data);
+  return request(`${API.AUTH}/register-customer`, {"method": "POST", "body": JSON.stringify(data)});
+}
+export async function updateCustomer(data) {
+  return request(`${API.AUTH}/update-customer`, {"method": "PUT", "body": JSON.stringify(data)});
+}
+export async function deleteCustomer() {
+  return request(`${API.AUTH}/delete-customer`, {"method": "DELETE"});
 }
 
-async function request(path, body) {
-  const res = await fetch(`${API}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) throw new Error("Auth error");
-
-  return res.json();
-}

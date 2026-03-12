@@ -107,19 +107,7 @@ public class AuthenticationCustomerService {
 
         User user = userRepository.findById(id)
             .orElseThrow(() -> new GeneralException(AuthError.USER_NOT_FOUND));
-
-        if (user.getRole() != Role.CUSTOMER) {
-            throw new GeneralException(AuthError.INVALID_ROLE_UPDATE_CUSTOMER);
-        }
-
-        // Username
-        if (request.getUsername() != null) {
-            if (request.getUsername().isBlank()) {
-                throw new GeneralException(AuthError.INVALID_USER_DATA);
-            }
-            user.setUsername(request.getUsername());
-        }
-
+        
         // Password (SIEMPRE encode)
         if (request.getPassword() != null) {
             if (request.getPassword().isBlank()) {

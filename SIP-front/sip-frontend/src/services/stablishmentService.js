@@ -1,4 +1,9 @@
+import request from "../api/Request";
+import { API } from "../api/config";
+
 const BASE = import.meta.env.VITE_API_STABLISHMENT;
+const USER_URL = import.meta.env.VITE_API_USER_STABLISHMENT;
+
 
 export async function createEstablishment(form) {
   const payload = {
@@ -17,14 +22,19 @@ export async function createEstablishment(form) {
       role: "ADMIN"
     }
   };
+  return request(`${API.STABLISHMENT}`, 
+    {"method": "POST", "body": JSON.stringify(payload)});
+}
+export async function getStablishments() {
+  return request(`${API.STABLISHMENT}/get-stablihsments-by-token`, {"method": "GET"});
+}
 
-  const res = await fetch(`${BASE}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+export async function leaveStablishment(stablishmentCode) {
+  return request(`${API.USER_STABLISHMENT}/delete-customer-relation-by-code/${stablishmentCode}`, {"method": "DELETE"});
+}
+export async function joinStablishment(stablishmentCode) {
+  return request(`${API.USER_STABLISHMENT}/add-relation-customer-stablishment`, {
+    "method": "POST",
+    "body": JSON.stringify({ stablishmentCode })
   });
-
-  if (!res.ok) throw new Error("Failed to create establishment");
-
-  return res.json();
 }

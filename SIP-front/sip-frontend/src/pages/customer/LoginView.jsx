@@ -7,63 +7,87 @@ import ErrorMessage from "../../components/ui/ErrorMessage.jsx"
 import { loginCustomer, loginEmployee } from "../../services/authService.js";
 import { useAuth } from "../../contex/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
+import { required, pattern, minLength, REGEX } from "../../utils/validators";
+import useForm from "../../hooks/useForm.js";
 
 export default function LoginCustomer() {
   const [mode, setMode] = useState("customer")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const { login } = useAuth();
-  const [form, setForm] = useState({
-    username: "",
-    password: "",
-    establishmentCode: ""
-  });
-  const navigate = useNavigate();
-    // limpiar el mode
-    useEffect(() => {
-    setForm({
-      username: "",
-      password: "",
-      establishmentCode: ""
-    });
-  }, [mode]);
+  // Valores dinamicos para los formularios
+  const FORM_CONFIG = {
+    customer: {
+      fields: [
+        { name: "username", placeholder: "Phone / Username", type: "text" },
+        { name: "password", placeholder: "Password", type: "password" }
+      ],
+      validation: {
+        username: [required],
+        password: [required, minLength(6)]
+      }
+    },
 
-  const handleLoginEmployee = async (e) => {
-    e.preventDefault();
+    employee: {
+      fields: [
+        { name: "username", placeholder: "Username", type: "text" },
+        { name: "password", placeholder: "Password", type: "password" },
+        { name: "establishmentCode", placeholder: "Establishment code", type: "text" }
+      ],
+      validation: {
+        username: [required],
+        password: [required, minLength(6)],
+        establishmentCode: [required]
+      }
+    }
+  };
+  const getInitialValues = (mode) => {
+    const values = {};
+    FORM_CONFIG[mode].fields.forEach(f => {
+      values[f.name] = "";
+    });
+    return values;
+  };
+  const config = FORM_CONFIG[mode];
+  const { values, errors, handleChange, validateForm } = useForm(
+    getInitialValues(mode),
+    config.validation
+  );
+  const navigate = useNavigate();
+  
+
+  const handleLoginEmployee = async () => {
+
+    if (!validateForm()) return;
+
     setError(null);
     setLoading(true);
 
     try {
-      const res = await loginEmployee(form);
+
+      const res = await loginEmployee(values);
+
       login(res.token);
 
     } catch (e) {
-      setError(e.message)
+      console.log(e);
+      setError(e.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-  const handleChange = (field) => (value) => {
-  setForm(prev => ({ ...prev, [field]: value }));
-};
-  const handleLoginCustomer = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+  };
+  const handleLoginCustomer = async () => {
+    if (!validateForm()) return;
+    console.log("entra");
 
     try {
-      const res = await loginCustomer(
-        {
-          username: form.username,
-          password: form.password
-        }
-      );
+
+      const res = await loginCustomer(values);
+
       login(res.token);
 
     } catch (err) {
       setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -75,8 +99,17 @@ export default function LoginCustomer() {
 
       {mode === "customer" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <Input placeholder="Phone / Username" onChange={handleChange("username")}/>
-          <Input type="password" placeholder="Password" onChange={handleChange("password")}/>
+          <Input 
+          placeholder="Phone / Username" 
+          value={values.username}
+          onChange={handleChange("username")}
+          error={errors.username}
+          />
+          <Input type="password" 
+          placeholder="Password" 
+          value={values.password}
+          onChange={handleChange("password")} 
+          error={errors.password}/>
           <p className="login__register"> 
             ¿No tienes cuenta?{" "}
             <span style={{color: "#11f", cursor: "pointer"}} onClick={() => navigate("/register")}>
@@ -92,9 +125,27 @@ export default function LoginCustomer() {
 
       {mode === "employee" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <Input placeholder="Username" onChange={handleChange("username")}/>
-          <Input type="password" placeholder="Password" onChange={handleChange("password")}/>
-          <Input placeholder="Establishment code" onChange={handleChange("establishmentCode")}/>
+          <Input
+            placeholder="Username"
+            value={values.username}
+            onChange={handleChange("username")}
+            error={errors.username}
+          />
+
+          <Input
+            type="password"
+            placeholder="Password"
+            value={values.password}
+            onChange={handleChange("password")}
+            error={errors.password}
+          />
+
+          <Input
+            placeholder="Establishment code"
+            value={values.establishmentCode}
+            onChange={handleChange("establishmentCode")}
+            error={errors.establishmentCode}
+          />
           <p className="login__register"> 
             ¿Tienes un negocio?{" "}
             <span style={{color: "#11f", cursor: "pointer"}} onClick={() => navigate("/create-establishment")}>

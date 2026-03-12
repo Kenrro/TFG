@@ -19,4 +19,7 @@ public class CreateRedeemTransactionRequestDto {
     @NotNull
     private Long productId;
 
+    @NotNull
+    private String stablishmentCode;
+
 }

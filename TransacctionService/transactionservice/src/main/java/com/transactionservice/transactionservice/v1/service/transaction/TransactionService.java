@@ -1,6 +1,7 @@
 package com.transactionservice.transactionservice.v1.service.transaction;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +48,18 @@ public class TransactionService {
         token = jwtUtil.cleanJwtToken(token);
         String code = jwtUtil.getClaim(token, "establishmentCode", String.class);
         Long id = jwtUtil.getClaim(token, "id", Long.class);
-        Transaction transaction = crudService.createGivePointsTransaction(request, code, id);
+        Transaction transaction = (GivePointsTransaction) crudService.findExistingTransaction(id, TransactionType.EARN_POINTS, code);
+        if (transaction != null) {
+            if (transaction instanceof GivePointsTransaction givePointsTransaction) {
+                givePointsTransaction.setAmountSpent(request.getAmountSpent());
+                givePointsTransaction.setCreatedAt(Instant.now());
+                givePointsTransaction.setExpiresAt(Instant.now().plus(7, ChronoUnit.DAYS));
+            } else {
+                throw new GeneralException(TransactionError.INVALID_TRANSACTION_TYPE);
+            }
+        } else {
+            transaction = crudService.createGivePointsTransaction(request, code, id);
+        }
         return TransactionUUIDDto.builder()
         .id(transaction.getId())
         .build();
@@ -111,9 +123,21 @@ public class TransactionService {
         String token
     ) {
         token = jwtUtil.cleanJwtToken(token);
-        String code = jwtUtil.getClaim(token, "establishmentCode", String.class);
         Long id = jwtUtil.getClaim(token, "id", Long.class);
-        Transaction transaction = crudService.createRedeemTransaction(request, code, id);
+        Transaction transaction = crudService.findExistingTransaction(id, TransactionType.REDEEM_PRODUCT, request.getStablishmentCode());
+        if (transaction != null) {
+            if (transaction instanceof RedeemProductTransaction redeemTransaction) {
+                redeemTransaction.setIncentiveId(request.getIncentiveId());
+                redeemTransaction.setProductId(request.getProductId());
+                redeemTransaction.setCreatedAt(Instant.now());
+                redeemTransaction.setExpiresAt(Instant.now().plus(7, ChronoUnit.DAYS));
+            } else {
+                throw new GeneralException(TransactionError.INVALID_TRANSACTION_TYPE);
+            }
+        } else {
+             transaction = crudService.createRedeemTransaction(request, id);
+            
+        }
         return TransactionUUIDDto.builder()
         .id(transaction.getId())
         .build();

@@ -1,11 +1,10 @@
 .ui-input {
   width: 100%;
-  padding: 14px;
-  border-radius: var(--radius-md);
-  border: 1px solid #e5e7eb;
-  font-size: 16px;
-  outline: none;
-  background: var(--color-white);
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #D1D5DB;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
 .ui-input:focus {
@@ -37,27 +36,32 @@
 /* Tabs para seleccionar las vistas de autenticación */
 .auth-tabs {
   display: flex;
-  background: var(--color-gray-light);
-  border-radius: var(--radius-md);
+  background: #F3F4F6;
+  border-radius: 12px;
   padding: 4px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .auth-tab {
   flex: 1;
+  padding: 10px;
+
   border: none;
   background: transparent;
-  padding: 10px;
-  border-radius: var(--radius-md);
-  font-weight: 600;
+
+  border-radius: 10px;
   cursor: pointer;
-  color: var(--color-gray-dark);
-  transition: 0.15s ease;
+
+  font-weight: 600;
+  color: #6B7280;
+
+  transition: all 0.2s;
 }
 
 .auth-tab.active {
-  background: var(--color-white);
-  box-shadow: var(--shadow-card);
+  background: white;
+  color: #374151;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 .btn.loading {
@@ -105,4 +109,118 @@
 .confirmation-card p {
   margin: 6px 0;
   color: #374151;
+}
+
+.ui-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ui-input-error {
+  border: 2px solid #F59E0B;
+}
+
+.ui-input-error-text {
+  font-size: 12px;
+  color: #F59E0B;
+}
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.points-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  background: #F3F4F6;
+  padding: 10px 0;
+}
+.points-counter {
+  background: #2563EB;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 20px;
+  display: flex;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.points-value {
+  font-size: 18px;
+}
+
+.points-label {
+  font-size: 12px;
+}
+
+.incentive-card {
+  background: white;
+  padding: 14px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.redeem-btn {
+  background: #F59E0B;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+
+  background: rgba(0,0,0,0.4);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-modal {
+  background: white;
+
+  padding: 20px;
+  border-radius: 14px;
+
+  width: 90%;
+  max-width: 320px;
+
+  text-align: center;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.cancel-btn {
+  background: #e5e7eb;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.confirm-btn {
+  background: #ef4444;
+  color: white;
+
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
 }

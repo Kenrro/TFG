@@ -1,6 +1,7 @@
 package com.transactionservice.transactionservice.v1.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,4 +31,22 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>{
     @Transactional
     @Query("DELETE FROM Transaction t WHERE t.stablishmentCode = :stablishmentCode")
     void deleteAllByStablishmentCode(@Param("stablishmentCode") String stablishmentCode);
+
+    @Query("SELECT t FROM Transaction t WHERE t.customerId = :customerId OR t.employeeId = :employeeId AND t.stablishmentCode = :stablishmentCode AND t.status = 'PENDING'")
+    List<Transaction> findExistingTransaction(@Param("customerId") Long customerId, @Param("employeeId") Long employeeId, @Param("stablishmentCode") String stablishmentCode);
+
+    @Query("""
+    SELECT t FROM Transaction t
+    WHERE 
+        (t.customerId = :customerId OR t.employeeId = :employeeId)
+        AND t.stablishmentCode = :stablishmentCode
+        AND t.status = 'PENDING'
+        AND t.type = :type
+    """)
+    List<Transaction> findExistingTransaction(
+            @Param("customerId") Long customerId,
+            @Param("employeeId") Long employeeId,
+            @Param("stablishmentCode") String stablishmentCode,
+            @Param("type") TransactionType type
+    );
 }

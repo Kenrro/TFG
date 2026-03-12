@@ -28,10 +28,15 @@ import lombok.RequiredArgsConstructor;
 public class TransactionCRUDService {
 
     private final TransactionRepository repository;
+
+    public Transaction findExistingTransaction(Long userId, TransactionType type, String stablishmentCode) {
+        Transaction transaction = repository.findExistingTransaction(userId, userId, stablishmentCode, type).stream().findFirst().orElse(null);
+        return transaction != null ? transaction : null;
+    }
+
     @Transactional
     public Transaction createRedeemTransaction(
             CreateRedeemTransactionRequestDto request,
-            String code,
             Long id
     ) {
         Instant now = Instant.now();
@@ -39,7 +44,7 @@ public class TransactionCRUDService {
             RedeemProductTransaction.builder()
                 .type(TransactionType.REDEEM_PRODUCT)
                 .status(TransactionStatus.PENDING)
-                .stablishmentCode(code)
+                .stablishmentCode(request.getStablishmentCode())
                 .employeeId(null)
                 .customerId(id)
                 .productId(request.getProductId())

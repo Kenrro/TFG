@@ -58,11 +58,12 @@ public class GlabalExceptionHandler extends ResponseEntityExceptionHandler {
     }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDto> handleGeneric(Exception ex) {
+        ex.printStackTrace();
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(
                 ErrorDto.builder()
-                    .from("Internal service")
+                    .from("Internal service from authorization service")
                     .timestamp(LocalDate.now())
                     .status(HttpStatus.INTERNAL_SERVER_ERROR.name())
                     .message("Unexpected error")

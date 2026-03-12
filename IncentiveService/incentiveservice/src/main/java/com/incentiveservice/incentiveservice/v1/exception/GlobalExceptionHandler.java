@@ -27,11 +27,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDto> handleGeneric(Exception ex) {
+        ex.printStackTrace();
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(
                 ErrorDto.builder()
-                    .from("Internal service")
+                    .from("Internal service from incentive service")
                     .timestamp(LocalDate.now())
                     .status(HttpStatus.INTERNAL_SERVER_ERROR.name())
                     .message("Unexpected error")

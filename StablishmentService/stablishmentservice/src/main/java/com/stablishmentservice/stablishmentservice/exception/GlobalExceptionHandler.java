@@ -65,7 +65,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(
                 ErrorDto.builder()
-                    .from("Internal service")
+                    .from("Internal service from stablishment service")
                     .timestamp(LocalDate.now())
                     .status("500")
                     .message("Unexpected error")
