@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contex/AuthContext";
 import "../../styles/layout.css";
 
-export default function SideDrawer({ open, onClose }) {
+export default function SideDrawer({ open, onClose, items = [] }) {
+
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -15,29 +16,22 @@ export default function SideDrawer({ open, onClose }) {
 
   return (
     <div className="drawer" onClick={(e) => e.stopPropagation()}>
+
       <h3 className="drawer-title">Menú</h3>
 
-      <button
-        className="drawer-item"
-        onClick={() => {
-          navigate("/customer");
-          onClose();
-        }}
-      >
-        <span>🏪</span>
-        Establecimientos
-      </button>
-
-      <button
-        className="drawer-item"
-        onClick={() => {
-          navigate("/customer/settings");
-          onClose();
-        }}
-      >
-        <span>⚙</span>
-        Configuración
-      </button>
+      {items.map((item) => (
+        <button
+          key={item.path}
+          className="drawer-item"
+          onClick={() => {
+            navigate(item.path);
+            onClose();
+          }}
+        >
+          <span>{item.icon}</span>
+          {item.label}
+        </button>
+      ))}
 
       <div className="drawer-spacer"></div>
 
@@ -48,6 +42,7 @@ export default function SideDrawer({ open, onClose }) {
         <span>🚪</span>
         Cerrar sesión
       </button>
+
     </div>
   );
 }

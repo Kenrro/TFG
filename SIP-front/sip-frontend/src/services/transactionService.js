@@ -16,3 +16,16 @@ export async function redeemProduct(incentiveId, productId, stablishmentCode) {
         body: JSON.stringify({ incentiveId, productId, stablishmentCode })
     })
 }
+// STAFF
+export async function createGivePointsTransaction(data) {
+    return request(`${API.TRANSACTION}/give-points`, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    })
+}
+export async function updateRedeemTransaction(id) {
+    return request(`${API.TRANSACTION}/redeem`, {
+        method: 'PUT',
+        body: JSON.stringify({ id })
+    })
+}

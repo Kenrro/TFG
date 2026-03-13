@@ -11,6 +11,9 @@ import CustomerEstablishmentView from "./pages/customer/CustomerEstablishmentVie
 import CustomerScanView from "./pages/customer/CustomerScanView"
 import CustomerRedeemView from "./pages/customer/CustomerRedeemView"
 import JoinEstablishmentView from "./pages/customer/JoinStablishmentView"
+import StaffInfo from "./pages/staff/StaffInfo"
+import StaffGivePointsView from "./pages/staff/StaffGivePointsView"
+import StaffScanView from "./pages/staff/StaffScanView"
 function App() {
 
   return (
@@ -91,6 +94,30 @@ function App() {
         element={
           <ProtectedRoute roles={["SELLER", "ADMIN"]}>
             <StaffDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/info"
+        element={
+          <ProtectedRoute roles={["SELLER", "ADMIN"]}>
+            <StaffInfo />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/give-points"
+        element={
+          <ProtectedRoute roles={["SELLER", "ADMIN"]}>
+            <StaffGivePointsView />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/redeem"
+        element={
+          <ProtectedRoute roles={["SELLER", "ADMIN"]}>
+            <StaffScanView />
           </ProtectedRoute>
         }
       />
