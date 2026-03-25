@@ -13,11 +13,12 @@ export default function CreateEstablishmentView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [created, setCreated] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [form, setForm] = useState({
     name: "",
     address: "",
-    phone: "",
-    email: "",
     description: "",
     adminUsername: "",
     adminPassword: "",
@@ -30,18 +31,24 @@ export default function CreateEstablishmentView() {
   };
 
   const handleSubmit = async () => {
-      setError(null);
-      setLoading(true);
+    setError(null);
 
-      try {
-        const response = await createEstablishment(form);
-        setCreated(response); 
-      } catch (e) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (form.adminPassword !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await createEstablishment(form);
+      setCreated(response); 
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleDownload = () => {
     if (!created) return;
 
@@ -108,14 +115,63 @@ export default function CreateEstablishmentView() {
 
         <Input placeholder="Establishment name" onChange={handleChange("name")} />
         <Input placeholder="Address" onChange={handleChange("address")} />
-        <Input placeholder="Phone" onChange={handleChange("phone")} />
-        <Input placeholder="Email" onChange={handleChange("email")} />
         <Input placeholder="Description" onChange={handleChange("description")} />
 
         <h3 className="form-section">Admin</h3>
 
         <Input placeholder="Admin username" onChange={handleChange("adminUsername")} />
-        <Input type="password" placeholder="Admin password" onChange={handleChange("adminPassword")} />
+        <div style={{ position: "relative" }}>
+        <Input
+          type={showPassword ? "text" : "password"}
+          placeholder="Admin password"
+          onChange={handleChange("adminPassword")}
+        />
+
+        <span
+          onClick={() => setShowPassword(!showPassword)}
+          style={{
+            position: "absolute",
+            right: 10,
+            top: "50%",
+            transform: "translateY(-50%)",
+            cursor: "pointer",
+            fontSize: "14px"
+          }}
+        >
+          {showPassword ? "🙈" : "👁"}
+        </span>
+      </div>
+      <div style={{ position: "relative" }}>
+      <Input
+        type={showConfirmPassword ? "text" : "password"}
+        placeholder="Repeat password"
+        onChange={(v) => setConfirmPassword(v)}
+      />
+
+      <span
+        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+        style={{
+          position: "absolute",
+          right: 10,
+          top: "50%",
+          transform: "translateY(-50%)",
+          cursor: "pointer",
+          fontSize: "14px"
+        }}
+      >
+        {showConfirmPassword ? "🙈" : "👁"}
+      </span>
+    </div>
+    {confirmPassword && (
+      <span style={{
+        fontSize: "12px",
+        color: form.adminPassword === confirmPassword ? "green" : "red"
+      }}>
+        {form.adminPassword === confirmPassword
+          ? "Passwords match"
+          : "Passwords do not match"}
+      </span>
+    )}
         <Input placeholder="Admin name" onChange={handleChange("adminName")} />
         <Input placeholder="Admin lastname" onChange={handleChange("adminLastname")} />
         <p className="login__register"> 

@@ -36,7 +36,7 @@ export default async function request(path, options = {}) {
     }
 
     if (!res.ok) {
-
+      console.log(res)
       const error = new Error(
         data?.message ||
         data?.error ||
@@ -52,7 +52,7 @@ export default async function request(path, options = {}) {
     return data;
 
   } catch (err) {
-
+    console.error(err)
     if (err.status) throw err;
 
     const error = new Error("NETWORK_ERROR");

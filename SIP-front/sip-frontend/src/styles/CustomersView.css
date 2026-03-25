@@ -1,0 +1,78 @@
+.customers-container {
+  padding: 20px;
+}
+
+.title {
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.customers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 15px;
+}
+
+.customer-card {
+  display: flex;
+  gap: 15px;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  align-items: center;
+}
+
+.customer-image img {
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+}
+
+.customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.customer-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.customer-username {
+  font-size: 14px;
+  color: #555;
+}
+
+.customer-date {
+  font-size: 13px;
+  color: #888;
+}
+
+.customer-wallet {
+  font-size: 14px;
+  font-weight: 500;
+  color: #10b981;
+}
+
+.customer-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #3b82f6; /* azul */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 600;
+}

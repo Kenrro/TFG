@@ -15,6 +15,7 @@ import com.authservice.auth.dto.auth.UsersDto;
 import com.authservice.auth.dto.stablisment.CreateRelationUserWithStablishmentRequestDto;
 import com.authservice.auth.dto.stablisment.RollbackDeleteEmployeesRequestDto;
 import com.authservice.auth.dto.stablisment.UsersIdsRequestDto;
+import com.authservice.auth.dto.stablisment.UsersQuantityResponseDto;
 import com.authservice.auth.entity.Role;
 import com.authservice.auth.entity.User;
 import com.authservice.auth.enums.AuthError;
@@ -87,7 +88,7 @@ public class AuthenticationEmployeeService {
         // get stablishment code from stablishmentService
         private String getEstablishmentCode(Long id) {
             return webClientService.secureGetMethod(
-                stablishmentMicroServiceUrl + "/get-stablishment-code/{userId}",
+                stablishmentMicroServiceUrl + "/{userId}/stablishment-code",
                 String.class,
                 id);
         }
@@ -110,7 +111,7 @@ public class AuthenticationEmployeeService {
             String establishmentCode = getEstablishmentCode();
             // call to establishment service to create relation user-establishment from webClientService
             webClientService.securePostMethod(
-                userStablishmentMicroServiceUrl + "/add-relation-employee-stablishment",
+                userStablishmentMicroServiceUrl + "/stablishments/employees",
                 CreateRelationUserWithStablishmentRequestDto.builder()
                     .userId(user.getId())
                     .StablishmentCode(establishmentCode)
@@ -182,6 +183,9 @@ public class AuthenticationEmployeeService {
                 )
             );
             user = (User) auth.getPrincipal();
+            if (user.getRole() == Role.CUSTOMER) {
+                throw new GeneralException(AuthError.ACCESS_DENIED);
+            }
             code = getEstablishmentCode(user.getId());
             if (!code.equals(request.getEstablishmentCode())) {
                 throw new GeneralException(AuthError.ACCESS_DENIED);
@@ -229,7 +233,7 @@ public class AuthenticationEmployeeService {
             Long id
         ) {
             webClientService.secureDeleteMethod(
-                userStablishmentMicroServiceUrl + "/delete-user-relations/{userId}", 
+                userStablishmentMicroServiceUrl + "/users/{userId}/stablishments", 
                 Void.class, 
                 id);
         }
@@ -289,6 +293,30 @@ public class AuthenticationEmployeeService {
         return UsersDto.builder()
         .users(users)
         .build();
+    }
+    public UsersQuantityResponseDto getUsersQuantity(
+        UsersIdsRequestDto request
+    ) {
+        int employees = 0;
+        int customers = 0;
+        List<User> users = userService.findAllByIds(request);
+        for(User user : users) {
+            if (user.getRole() == Role.CUSTOMER) {
+                customers++;
+            } else {
+                employees++;
+            }
+        }
+        return UsersQuantityResponseDto.builder()
+            .employees(employees)
+            .customers(customers)
+            .build();
+    }
+
+    public void changePassword(Long id, String newPassword) {
+        User user = userService.findById(id);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userService.updateUser(user);
     }
 
 }

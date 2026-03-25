@@ -35,6 +35,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 
+
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
@@ -43,7 +44,10 @@ public class ProductController {
 
     private final ProductService productService;
 
-    
+    @GetMapping("/ping")
+    public String ping() {
+        return "PRODUCT SERVICE OK";
+    }
     /**
      * Get product by ID.
      * Only accessible by ADMIN or SELLER.
@@ -88,7 +92,7 @@ public class ProductController {
     )
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER')")
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("/get-by-id/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ProductResponsetDto> getById(
             @PathVariable
             @Parameter(description = "ID of the product", example = "10")
@@ -155,7 +159,7 @@ public class ProductController {
     )
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER')")
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("/get-all-by-stablishment-code/{code}")
+    @GetMapping("/stablishments/{code}/products")
     public ResponseEntity<List<ProductResponsetDto>> getAllByStablishmentCode(
             @PathVariable
             @Parameter(description = "Establishment code", example = "EST-9F3A2B")
@@ -172,7 +176,7 @@ public class ProductController {
     "hasAuthority('CUSTOMER') or hasRole('SERVICE')"
     )
     @SecurityRequirement(name = "bearerAuth")
-    @PostMapping("/get-all-by-ids")
+    @PostMapping("/products/search")
     @Operation(
         summary = "Get products by IDs",
         description = "Retrieve multiple products by their IDs. Accessible by ADMIN, SELLER, CUSTOMER or SERVICE roles.",
@@ -254,8 +258,8 @@ public class ProductController {
      * Only accessible by ADMIN.
      */
     @Operation(
-        summary = "Create a new product",
-        description = "Create a new product for the system. Requires ADMIN role.",
+        summary = "Create product",
+        description = "Creates a new product. Requires ADMIN role.",
         responses = {
             @ApiResponse(
                 responseCode = "201",
@@ -273,26 +277,24 @@ public class ProductController {
     )
     @PreAuthorize("hasAuthority('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @PostMapping("/create")
+    @PostMapping
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
-        description = "Product creation data",
+        description = "Product data to create",
         required = true,
         content = @Content(
             schema = @Schema(implementation = ProductCreateRequestDto.class),
-            examples = {
-                @ExampleObject(
-                    name = "Create product example",
-                    summary = "Valid product creation request",
-                    value = """
-                    {
-                    "name": "Hamburguesa Clásica",
-                    "description": "Hamburguesa con carne 100% vacuno",
-                    "price": 9.99,
-                    "available": true
-                    }
-                    """
-                )
-            }
+            examples = @ExampleObject(
+                name = "Create product",
+                summary = "Example request",
+                value = """
+                {
+                "name": "Hamburguesa Clásica",
+                "description": "Hamburguesa con carne 100% vacuno",
+                "price": 9.99,
+                "available": true
+                }
+                """
+            )
         )
     )
     public ResponseEntity<Void> create(
@@ -301,6 +303,7 @@ public class ProductController {
     ) {
 
         productService.createProduct(token, request);
+
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -333,7 +336,7 @@ public class ProductController {
     )
     @PreAuthorize("hasAuthority('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
         description = "Updated product data",
         required = true,
@@ -392,7 +395,7 @@ public class ProductController {
     )
     @PreAuthorize("hasAuthority('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @DeleteMapping("/delete-by-id/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(
             @PathVariable
             @Parameter(description = "ID of the product to delete", example = "10")
@@ -447,7 +450,7 @@ public class ProductController {
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
     @SecurityRequirement(name = "bearerAuth")
-    @DeleteMapping("/delete-by-code/{code}")
+    @DeleteMapping("/stablishments/{code}/products")
     public ResponseEntity<DeletedProductsResponseDto> deleteByCode(
             @PathVariable
             @Parameter(description = "Establishment code", example = "EST-9F3A2B")
@@ -533,4 +536,13 @@ public class ProductController {
         productService.createProducts(responseDto.getProducts());
         return ResponseEntity.ok().build();
     }
+    @Hidden
+    @PreAuthorize("hasAuthority('SERVICE')")
+    @GetMapping("/stablishment/{stablishmentCode}/dashboard")
+    public ResponseEntity<Integer> getProdutcInformation(
+        @PathVariable String stablishmentCode
+    ) {
+        return ResponseEntity.ok(productService.getProductsQuantity(stablishmentCode)); // Replace 42 with actual product information
+    }
+    
 }

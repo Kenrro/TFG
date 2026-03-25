@@ -133,4 +133,8 @@ public class TransactionCRUDService {
     ) {
         repository.deleteAllByStablishmentCode(code);
     }
+
+    public List<Transaction> findByStablishment(String stablishmentCode) {
+        return repository.findByStablishmentCode(stablishmentCode);
+    }
 }

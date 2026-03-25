@@ -36,9 +36,9 @@ public class SecurityConfig {
                 .requestMatchers("/api-key/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
-                    "/api/auth/login-customer",
-                    "/api/auth/register-customer",
-                    "/api/auth/login-employee"
+                    "/api/auth/login/customers",
+                    "/api/auth/customers",
+                    "/api/auth/login/employees"
                 ).permitAll()
                 .anyRequest().authenticated()
             );

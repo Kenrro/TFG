@@ -93,7 +93,7 @@ public class IncentiveController {
     )
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER') or hasAuthority('CUSTOMER')")
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("/get-by-stablishment-code/{stablishmentCode}")
+    @GetMapping("/stablishment/{stablishmentCode}/incentives")
     public ResponseEntity<ProductsIncentivesDto> getByStablishmentCode(
             @PathVariable
             @Parameter(description = "Code of the stablishment", example = "EST-9F3A2B")
@@ -345,7 +345,7 @@ public class IncentiveController {
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
     @SecurityRequirement(name = "bearerAuth")
-    @DeleteMapping("/delete-by-product-id/{productId}")
+    @DeleteMapping("/products/{productId}/incentives")
     public ResponseEntity<Void> deleteByProductId(
             @PathVariable
             @Parameter(description = "ID of the product whose incentive will be deleted", example = "10")
@@ -383,7 +383,7 @@ public class IncentiveController {
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
     @SecurityRequirement(name = "bearerAuth")
-    @DeleteMapping("/delete-by-stablishment/{stablishmentCode}")
+    @DeleteMapping("/stablishments/{stablishmentCode}/incentives")
     public ResponseEntity<Void> deleteByCode(
             @PathVariable
             @Parameter(description = "Stablishment code", example = "EST-9F3A2B")
@@ -392,6 +392,16 @@ public class IncentiveController {
 
         incentiveService.deleteAllByStablishmentCode(stablishmentCode);
         return ResponseEntity.ok().build();
+    }
+    @Hidden
+    @PreAuthorize("hasRole('SERVICE')")
+    @GetMapping("/stablishments/{stablishmentCode}/dashboard")
+    public ResponseEntity<Integer> getIncentivesQuantity(
+            @PathVariable
+            String stablishmentCode
+    ) {
+
+        return ResponseEntity.ok(incentiveService.getIncentiveQuantity(stablishmentCode));
     }
 }
 

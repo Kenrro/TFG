@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stablishmentservice.stablishmentservice.dto.authorization.AddRelationCustomerWithStablishmentRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.authorization.AddRelationUserWithStablishmentRequestDto;
-import com.stablishmentservice.stablishmentservice.dto.authorization.UsersDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.UserStablishmentResponseDto;
+import com.stablishmentservice.stablishmentservice.dto.stablishment.UsersRelationsResponseDto;
 import com.stablishmentservice.stablishmentservice.service.userStablishment.UserStablishmentService;
 
 import io.swagger.v3.oas.annotations.Hidden;
@@ -44,7 +44,7 @@ public class UserStablishmentController {
     // =========================================================
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @SecurityRequirement(name = "bearerAuth")
-    @PostMapping("/add-relation-customer-stablishment")
+    @PostMapping("/stablishments/customers")
     @Operation(
         summary = "Add relation between user and establishment",
         description = "Creates a relation between the authenticated user and an establishment.",
@@ -108,7 +108,7 @@ public class UserStablishmentController {
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
     @SecurityRequirement(name = "bearerAuth")
-    @PostMapping("/add-relation-employee-stablishment")
+    @PostMapping("/stablishments/employees")
     @Operation(
         summary = "Add relation between employee and establishment",
         description = "Creates a relation between an employee and an establishment.",
@@ -200,7 +200,7 @@ public class UserStablishmentController {
     // =========================================================
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER')")
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("/get-all-employee-relations")
+    @GetMapping("/stablishments/employees")
     @Operation(
         summary = "Get all employees of an establishment",
         description = "Retrieve all employees related to the establishment associated with the token. Requires ADMIN or SELLER role.",
@@ -243,7 +243,7 @@ public class UserStablishmentController {
             )
         }
     )
-    public ResponseEntity<UsersDto> getAllEmployees(
+    public ResponseEntity<UsersRelationsResponseDto> getAllEmployees(
             @RequestHeader("Authorization")
             @Parameter(description = "Bearer token")
             String authHeader
@@ -253,13 +253,71 @@ public class UserStablishmentController {
                 userStablishmentService.getAllEmployess(authHeader)
         );
     }
+    // =========================================================
+    // GET ALL EMPLOYEES OF AN ESTABLISHMENT (ADMIN / SELLER)
+    // =========================================================
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('SELLER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/stablishments/customers")
+    @Operation(
+        summary = "Get all customers of an establishment",
+        description = "Retrieve all employees related to the establishment associated with the token. Requires ADMIN or SELLER role.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Employees retrieved successfully",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UserStablishmentResponseDto.class),
+                    examples = {
+                        @ExampleObject(
+                            name = "Employees list",
+                            summary = "Example response",
+                            value = """
+                            [
+                            {
+                                "userId": 12,
+                                "username": "688965423",
+                                "name": "Laura",
+                                "lastname": "García",
+                                "role": "EMPLOYEE"
+                            },
+                            {
+                                "userId": 18,
+                                "username": "699887766",
+                                "name": "Carlos",
+                                "lastname": "Pérez",
+                                "role": "EMPLOYEE"
+                            }
+                            ]
+                            """
+                        )
+                    }
+                )
+            ),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Forbidden - ADMIN or SELLER role required"
+            )
+        }
+    )
+    public ResponseEntity<UsersRelationsResponseDto> getAllCustomers(
+            @RequestHeader("Authorization")
+            @Parameter(description = "Bearer token")
+            String authHeader
+    ) {
+
+        return ResponseEntity.ok(
+                userStablishmentService.getAllCustomers(authHeader)
+        );
+    }
 
     // =========================================================
     // DELETE ALL CUSTOMER RELATIONS
     // =========================================================
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
-    @DeleteMapping("/delete-user-relations/{userId}")
+    @DeleteMapping("/users/{userId}/stablishments")
     @Operation(
         summary = "Delete customer relation",
         description = "Deletes the customer–establishment relation for the given user. Requires SERVICE role.",
@@ -292,7 +350,7 @@ public class UserStablishmentController {
     // DELETE CUSTOMER ↔ ESTABLISHMENT RELATION BY CODE (CUSTOMER)
     // =========================================================
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    @DeleteMapping("/delete-customer-relation-by-code/{stablishmentCode}")
+    @DeleteMapping("/customers/me/stablishment/{stablishmentCode}")
     @Operation(
         summary = "Delete customer relation by establishment code",
         description = "Deletes the relation of the authenticated customer with a specific establishment using its code. Requires CUSTOMER role.",

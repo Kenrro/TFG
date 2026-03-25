@@ -1,0 +1,112 @@
+/* IncentivesPage.css */
+
+.incentives-container {
+  padding: 20px;
+}
+
+/* TITLE */
+
+.title {
+  margin-bottom: 20px;
+}
+
+/* GRID MÁS GRANDE */
+
+.incentives-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* CARD GRANDE */
+
+.incentive-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  background: white;
+  transition: 0.2s;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.incentive-card:hover {
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+/* HEADER */
+
+.card-header {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* DESCRIPTION */
+
+.card-description {
+  font-size: 13px;
+  color: #666;
+  margin-top: 6px;
+}
+
+/* POINTS */
+
+.card-points {
+  margin-top: 12px;
+  font-size: 16px;
+}
+
+/* STATUS */
+
+.status {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.status.active {
+  color: green;
+}
+
+.status.inactive {
+  color: red;
+}
+
+/* ACTIONS */
+
+.card-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.card-actions button {
+  border: none;
+  background: #f3f4f6;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.card-actions .delete {
+  background: #ef4444;
+  color: white;
+}
+
+/* FORM */
+
+.form-box {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* BUTTON ZONE */
+
+.actions {
+  margin-top: 20px;
+}

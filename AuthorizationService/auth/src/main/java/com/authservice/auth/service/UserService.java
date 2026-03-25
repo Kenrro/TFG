@@ -98,6 +98,16 @@ public class UserService {
     ) {
         return userRepository.findAllEmployees(request.getUserIds());
     }
+    public List<User> findAllCustomers(
+        UsersIdsRequestDto request
+    ) {
+        return userRepository.findAllCustomers(request.getUserIds());
+    }
+    public List<User> findAllByIds(
+        UsersIdsRequestDto request
+    ) {
+        return userRepository.findAllByIds(request.getUserIds());
+    }
 
     public void saveAll(List<User> users) {
         try {

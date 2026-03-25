@@ -60,6 +60,7 @@ public class IncentiveCRUDService {
         if (!incentive.getStablishmentCode().equals(codeByToken)) throw new GeneralException(IncentiveError.USER_NOT_AUTHORIZED);
         
         incentive.setPointsRequired(request.getPoinstRequired());
+        incentive.setActive(request.isActive());
         incentiveRepository.save(incentive);
     }
     public void delete(

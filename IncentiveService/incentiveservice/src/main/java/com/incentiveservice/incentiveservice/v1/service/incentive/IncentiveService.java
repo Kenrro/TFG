@@ -83,7 +83,7 @@ public class IncentiveService {
     // Find products in product service by ids
         private ProductsResponseDto getProductsFromProductService(List<Long> ids) {
             return WebClientService.securePostMethod(
-                productServiceUrl + "/get-all-by-ids", 
+                productServiceUrl + "/products/search", 
                 ids, 
                 ProductsResponseDto.class);
         }
@@ -100,7 +100,7 @@ public class IncentiveService {
             Long id
         ) {
             WebClientService.secureGetMethod(
-                productServiceUrl + "/get-by-id/{id}", 
+                productServiceUrl + "/{id}", 
                 ProductsResponseDto.class, 
                 id);
         }
@@ -142,5 +142,8 @@ public class IncentiveService {
         Long productId
     ) {
         incentiveCRUDService.deleteByProductId(productId);
+    }
+    public int getIncentiveQuantity(String stablishmentCode) {
+        return incentiveCRUDService.getIncentivesByStablishmentCode(stablishmentCode).size();
     }
 }

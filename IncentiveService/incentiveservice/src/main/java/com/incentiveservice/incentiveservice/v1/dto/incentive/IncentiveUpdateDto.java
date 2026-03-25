@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class IncentiveUpdateDto {
     private int poinstRequired;
+    private boolean active;
 }

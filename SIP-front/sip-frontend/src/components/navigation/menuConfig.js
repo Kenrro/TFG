@@ -1,3 +1,4 @@
+const newLocal = "ℹ";
 export const MENU_CONFIG = {
 
   CUSTOMER: [
@@ -30,17 +31,27 @@ export const MENU_CONFIG = {
     {
       label: "Dashboard",
       path: "/admin",
+      icon: "💹"
+    },
+    {
+      label: "Ecommerce",
+      path: "/staff",
       icon: "📊"
     },
     {
       label: "Empleados",
-      path: "/admin/employees",
+      path: "/staff/management",
       icon: "👥"
     },
     {
       label: "Información personal",
       path: "/staff/info",
       icon: "ℹ️"
+    },
+    {
+      label: "Configuración",
+      path: "/admin/settings",
+      icon: "⚙️"
     }
   ]
 

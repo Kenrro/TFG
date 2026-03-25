@@ -41,4 +41,15 @@ public interface UserPointsRepository extends JpaRepository<UserPoints, Long> {
     List<UserPoints> findAllByStablishmentCode(
         @Param("stablishmentCode") String stablishmentCode
     );
+
+    @Query("""
+        SELECT us
+        FROM UserPoints us
+        WHERE us.userId IN :ids AND
+        us.stablishmentCode = :stablishmentCode
+    """)
+    List<UserPoints> findAllByUsersId(
+        @Param("ids")List<Long> ids,
+        @Param("stablishmentCode") String stablishmentCode
+    );
 }

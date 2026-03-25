@@ -2,6 +2,7 @@ package com.stablishmentservice.stablishmentservice.service.userStablishment;
 
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,8 @@ import com.stablishmentservice.stablishmentservice.dto.authorization.UsersDto;
 import com.stablishmentservice.stablishmentservice.dto.authorization.UsersIdsRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.incentive.points.UserPointsRequest;
 import com.stablishmentservice.stablishmentservice.dto.incentive.points.UsersPointsDto;
+import com.stablishmentservice.stablishmentservice.dto.stablishment.RelationUserStablishmentDto;
+import com.stablishmentservice.stablishmentservice.dto.stablishment.UsersRelationsResponseDto;
 import com.stablishmentservice.stablishmentservice.entity.UserStablishment;
 import com.stablishmentservice.stablishmentservice.enums.StablishmentError;
 import com.stablishmentservice.stablishmentservice.exception.GeneralException;
@@ -132,7 +135,7 @@ public class UserStablishmentService {
             String StablishmentCode
         ) {
             return webClientService.secureDeleteMethod(
-                userPointsUrl + "/delete-all-users-wallets-by-stablishment-code/{stablishmentCode}", 
+                userPointsUrl + "/stablishments/{stablishmentCode}", 
                 UsersPointsDto.class, 
                 StablishmentCode);
         }
@@ -160,7 +163,7 @@ public class UserStablishmentService {
             Long userId
         ) {
             return webClientService.secureDeleteMethod(
-                userPointsUrl + "/delete-all-user-wallets/{userId}", 
+                userPointsUrl + "/user/{userId}", 
                 UsersPointsDto.class, 
                 userId);
         }
@@ -201,7 +204,7 @@ public class UserStablishmentService {
     // =========================================================
     // GET EMPLOYEES
     // =========================================================
-    public UsersDto getAllEmployess(
+    public UsersRelationsResponseDto getAllEmployess(
         String token
     ) {
         token = jwtUtil.cleanJwtToken(token);
@@ -212,7 +215,7 @@ public class UserStablishmentService {
         return getUsersInfo(relations);
     }
         // Get info from auth service
-        private UsersDto getUsersInfo(
+        private UsersRelationsResponseDto getUsersInfo(
             List<UserStablishment> relations
         ){
             UsersIdsRequestDto ids = UsersIdsRequestDto.builder()
@@ -221,12 +224,111 @@ public class UserStablishmentService {
             ) 
             .build();
             UsersDto users = webClientService.securePostMethod(
-                authServiceUrl + "/get-all-employees",
+                authServiceUrl + "/employees/search",
                 ids, 
                 UsersDto.class);
             users.getUsers().forEach(user -> System.out.println(user.getUsername()+"--------------------"));
-            return users;
+            List<RelationUserStablishmentDto> relationsList = users.getUsers().stream().map(user -> {
+                RelationUserStablishmentDto relation = RelationUserStablishmentDto.builder()
+                    .userId(user)
+                    .registeredAt(relations.stream()
+                        .filter(r -> r.getUserId().equals(user.getId()))
+                        .findFirst()
+                        .orElseThrow(() -> new GeneralException(StablishmentError.STABLISHMENT_NOT_FOUND))
+                        .getRegisteredAt())
+                    .build();
+                return relation;
+            }).toList();
+            return UsersRelationsResponseDto.builder()
+                .relations(relationsList)
+                .build();
         }
+    public UsersRelationsResponseDto getAllCustomers(
+        String token
+    ) {
+        token = jwtUtil.cleanJwtToken(token);
+        String stablishmentCode = jwtUtil.getClaim(token, "establishmentCode", String.class);
+        Long stablishmentId = getStablishmentIdByCode(stablishmentCode);
+        List<UserStablishment> relations = userStablishmentCRUDService.getByStablishmentId(stablishmentId);
+        relations.forEach(relation -> System.out.println(relation.getId()));
+        return getCustomerInfo(relations, stablishmentCode);
+    }
+        // Get info from auth service
+        private UsersRelationsResponseDto getCustomerInfo(
+            List<UserStablishment> relations,
+            String code
+        ){
+            UsersIdsRequestDto ids = UsersIdsRequestDto.builder()
+            .userIds(
+                relations.stream().map(relation -> relation.getUserId()).toList()
+            ) 
+            .build();
+            UsersDto users = webClientService.securePostMethod(
+                authServiceUrl + "/customers/search",
+                ids, 
+                UsersDto.class);
+            users.getUsers().forEach(user -> System.out.println(user.getUsername()+"--------------------"));
+            List<RelationUserStablishmentDto> relationsList = users.getUsers().stream().map(user -> {
+                RelationUserStablishmentDto relation = RelationUserStablishmentDto.builder()
+                    .userId(user)
+                    .registeredAt(relations.stream()
+                        .filter(r -> r.getUserId().equals(user.getId()))
+                        .findFirst()
+                        .orElseThrow(() -> new GeneralException(StablishmentError.STABLISHMENT_NOT_FOUND))
+                        .getRegisteredAt())
+                    .build();
+                return relation;
+            }).toList();
+            return  getInfoFromUserPointsService(
+                UsersRelationsResponseDto.builder()
+                .relations(relationsList)
+                .build(),
+                code
+            );
+        }
+        private UsersRelationsResponseDto getInfoFromUserPointsService(
+            UsersRelationsResponseDto relations,
+            String code
+        ) {
+            List<Long> ids = relations.getRelations().stream().map(relation -> relation.getUserId().getId()).toList();
+            UsersPointsDto wallets = webClientService.securePostMethod(
+                userPointsUrl + "/stablishment/{code}/customers/wallets",
+                UsersIdsRequestDto.builder().userIds(ids).build(),
+                UsersPointsDto.class,
+                code
+            );
+            relations.getRelations().forEach(
+                relation -> 
+                {
+                    Long id = relation.getUserId().getId();
+
+                    Integer balance = wallets.getUserPoints()
+                            .stream()
+                            .filter(wallet -> wallet.getUserId().equals(id))
+                            .map(wallet -> wallet.getBalance())
+                            .findFirst()
+                            .orElse(0);
+                    relation.setWallet(balance);
+                
+                }
+            );
+            return relations;
+            
+        }
+    public UsersIdsRequestDto getAllUsers(
+        String token
+    ) {
+        token = jwtUtil.cleanJwtToken(token);
+        String stablishmentCode = jwtUtil.getClaim(token, "establishmentCode", String.class);
+        Long stablishmentId = getStablishmentIdByCode(stablishmentCode);
+        List<UserStablishment> relations = userStablishmentCRUDService.getByStablishmentId(stablishmentId);
+        UsersIdsRequestDto ids = UsersIdsRequestDto.builder()
+            .userIds(
+                relations.stream().map(relation -> relation.getUserId()).toList()
+            ) 
+            .build();
+        return ids;
+    }
     // =========================================================
     // DELETE RELATION CUSTOMER
     // =========================================================
@@ -240,7 +342,7 @@ public class UserStablishmentService {
             Long id
         ) {
             return webClientService.secureDeleteMethod(
-                userPointsUrl + "/delete-all-user-wallets/{userId}", 
+                userPointsUrl + "/user/{userId}", 
                 UsersPointsDto.class, 
                 id);
         }
@@ -268,7 +370,7 @@ public class UserStablishmentService {
             String stablishmentCode
         ) {
             return webClientService.secureDeleteMethod(
-                userPointsUrl + "/{userId}/{stablishmentCode}/delete", 
+                userPointsUrl + "/user/{userId}/stablishment/{stablishmentCode}", 
                 UsersPointsDto.class, 
                 userId,
                 stablishmentCode

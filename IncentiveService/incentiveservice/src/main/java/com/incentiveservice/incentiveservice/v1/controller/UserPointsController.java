@@ -3,6 +3,7 @@ package com.incentiveservice.incentiveservice.v1.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.incentiveservice.incentiveservice.v1.dto.stablishmentconfiguration.UsersIdsRequestDto;
 import com.incentiveservice.incentiveservice.v1.dto.userpoints.UserPointsCreateRequestDto;
 import com.incentiveservice.incentiveservice.v1.dto.userpoints.UserPointsDto;
 import com.incentiveservice.incentiveservice.v1.dto.userpoints.UserPointsUpdateRequestDto;
@@ -249,7 +250,7 @@ public class UserPointsController {
     )
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
-    @DeleteMapping("/{userId}/{stablishmentCode}/delete")
+    @DeleteMapping("/user/{userId}/stablishment/{stablishmentCode}")
     public ResponseEntity<UsersPointsDto> deleteUserPoints(
             @PathVariable Long userId,
             @PathVariable String stablishmentCode
@@ -271,7 +272,7 @@ public class UserPointsController {
         }
     )
     @PreAuthorize("hasRole('SERVICE')")
-    @DeleteMapping("/delete-all-user-wallets/{userId}")
+    @DeleteMapping("/user/{userId}")
     public ResponseEntity<UsersPointsDto> deleteAllUserPoints(
             @PathVariable
             @Parameter(description = "User ID", example = "25")
@@ -294,7 +295,7 @@ public class UserPointsController {
     )
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
-    @DeleteMapping("/delete-all-users-wallets-by-stablishment-code/{stablishmentCode}")
+    @DeleteMapping("/stablishments/{stablishmentCode}")
     public ResponseEntity<UsersPointsDto> deleteAllUserPoints(
             @PathVariable
             @Parameter(description = "Stablishment code", example = "EST-9F3A2B")
@@ -349,6 +350,18 @@ public class UserPointsController {
         userPointsService.createAll(request);
         return ResponseEntity.ok().build();
     }
+
+    @PreAuthorize("hasRole('SERVICE')")
+    @PostMapping("/stablishment/{code}/customers/wallets")
+    public ResponseEntity<UsersPointsDto> findCustomersWallets(
+        @RequestBody UsersIdsRequestDto request,
+        @PathVariable("code") String code
+    ) {
+        UsersPointsDto wallets = userPointsService.findUserPoints(request, code);
+        
+        return ResponseEntity.ok(wallets);
+    }
+    
 
     
 }

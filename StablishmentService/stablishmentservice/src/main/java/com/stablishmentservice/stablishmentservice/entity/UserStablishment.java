@@ -1,5 +1,9 @@
 package com.stablishmentservice.stablishmentservice.entity;
 
+import java.time.Instant;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,5 +34,7 @@ public class UserStablishment {
     private Long userId;
     @Column(nullable = false)
     private Long stablishmentId;
+    @CreationTimestamp
+    private Instant registeredAt;
 
 }

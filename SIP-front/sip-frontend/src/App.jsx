@@ -14,6 +14,13 @@ import JoinEstablishmentView from "./pages/customer/JoinStablishmentView"
 import StaffInfo from "./pages/staff/StaffInfo"
 import StaffGivePointsView from "./pages/staff/StaffGivePointsView"
 import StaffScanView from "./pages/staff/StaffScanView"
+import AdminDashboard from "./pages/staff/AdminDashBoard"
+import StaffManagement from "./pages/staff/StaffManagement"
+import TransactionsView from "./pages/staff/TransactionsView"
+import ProductsView from "./pages/staff/ProductsView"
+import IncentivesView from "./pages/staff/IncentivesView.jsx"
+import SettingsView from "./pages/staff/SettingsView.jsx"
+import CustomersView from "./pages/staff/CustomersView.jsx"
 function App() {
 
   return (
@@ -98,6 +105,14 @@ function App() {
         }
       />
       <Route
+        path="/admin"
+        element={
+          <ProtectedRoute roles={["ADMIN"]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/staff/info"
         element={
           <ProtectedRoute roles={["SELLER", "ADMIN"]}>
@@ -118,6 +133,54 @@ function App() {
         element={
           <ProtectedRoute roles={["SELLER", "ADMIN"]}>
             <StaffScanView />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/management"
+        element={
+          <ProtectedRoute roles={["ADMIN"]}>
+            <StaffManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/transactions"
+        element={
+          <ProtectedRoute roles={["ADMIN"]}>
+            <TransactionsView />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/products"
+        element={
+          <ProtectedRoute roles={["ADMIN"]}>
+            <ProductsView />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/incentives"
+        element={
+          <ProtectedRoute roles={["ADMIN"]}>
+            <IncentivesView />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute roles={["ADMIN"]}>
+            <SettingsView />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/customers"
+        element={
+          <ProtectedRoute roles={["ADMIN"]}>
+            <CustomersView />
           </ProtectedRoute>
         }
       />

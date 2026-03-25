@@ -1,0 +1,33 @@
+.settings-container {
+  max-width: 900px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-title {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.settings-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.points-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.points-row input {
+  width: 100px;
+  padding: 6px;
+}

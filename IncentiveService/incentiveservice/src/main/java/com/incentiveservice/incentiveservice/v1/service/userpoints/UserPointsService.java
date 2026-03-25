@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.incentiveservice.incentiveservice.v1.dto.stablishmentconfiguration.UsersIdsRequestDto;
 import com.incentiveservice.incentiveservice.v1.dto.userpoints.UserPointsDto;
 import com.incentiveservice.incentiveservice.v1.dto.userpoints.UsersPointsDto;
 import com.incentiveservice.incentiveservice.v1.entity.UserPoints;
@@ -102,6 +103,23 @@ public class UserPointsService {
             )
             .toList()
         ).build();
+    }
+    public UsersPointsDto findUserPoints(UsersIdsRequestDto request, String code) {
+        List<UserPoints> userPoints = userPointsCRUDService.findAll(request, code);
+        return UsersPointsDto.builder()
+                .userPoints(
+                    userPoints
+                    .stream()
+                    .map(up -> 
+                        UserPointsDto.builder()
+                        .balance(up.getBalance())
+                        .userId(up.getUserId())
+                        .stablishmentCode(up.getStablishmentCode())
+                        .build()
+                    )
+                    .toList()
+                )
+                .build();
     }
 }
 

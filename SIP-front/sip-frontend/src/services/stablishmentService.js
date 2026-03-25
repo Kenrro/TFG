@@ -10,8 +10,6 @@ export async function createEstablishment(form) {
     stablishment: {
       name: form.name,
       address: form.address,
-      phone: form.phone,
-      email: form.email,
       description: form.description
     },
     adminUser: {
@@ -22,19 +20,36 @@ export async function createEstablishment(form) {
       role: "ADMIN"
     }
   };
+  console.log(payload)
   return request(`${API.STABLISHMENT}`, 
     {"method": "POST", "body": JSON.stringify(payload)});
 }
 export async function getStablishments() {
-  return request(`${API.STABLISHMENT}/get-stablihsments-by-token`, {"method": "GET"});
+  return request(`${API.STABLISHMENT}/stablishments/me`, {"method": "GET"});
+}
+export async function updateStablishment(data) {
+  return request(`${API.STABLISHMENT}`, {"method": "PUT", "body": JSON.stringify(data)});
+}
+export async function deleteStablishment() {
+  return request(`${API.STABLISHMENT}`, {"method": "DELETE"});
 }
 
 export async function leaveStablishment(stablishmentCode) {
-  return request(`${API.USER_STABLISHMENT}/delete-customer-relation-by-code/${stablishmentCode}`, {"method": "DELETE"});
+  return request(`${API.USER_STABLISHMENT}/customers/me/stablishment/${stablishmentCode}`, {"method": "DELETE"});
 }
 export async function joinStablishment(stablishmentCode) {
-  return request(`${API.USER_STABLISHMENT}/add-relation-customer-stablishment`, {
+  return request(`${API.USER_STABLISHMENT}/stablishments/customers`, {
     "method": "POST",
     "body": JSON.stringify({ stablishmentCode })
   });
+}
+
+export async function getDashboard() {
+  return request(`${API.STABLISHMENT}/dashboard`, {"method": "GET"});
+}
+export async function getStaff() {
+  return request(`${API.USER_STABLISHMENT}/stablishments/employees`, {"method": "GET"});
+}
+export async function getCustomers() {
+  return request(`${API.USER_STABLISHMENT}/stablishments/customers`, {"method": "GET"});
 }

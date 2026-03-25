@@ -26,3 +26,10 @@
   margin-bottom: 6px;
   color: #374151;
 }
+
+.info-card input {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  margin-left: 5px;
+}

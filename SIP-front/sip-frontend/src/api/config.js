@@ -6,6 +6,8 @@ export const API = {
   USER_STABLISHMENT: `http://${HOST}:${import.meta.env.VITE_API_USER_STABLISHMENT}/user-stablishments`,
   WALLET: `http://${HOST}:${import.meta.env.VITE_API_WALLET}/v1/user-points`,
   TRANSACTION: `http://${HOST}:${import.meta.env.VITE_API_TRANSACTIONS}/v1/transactions`,
-  INCENTIVES: `http://${HOST}:${import.meta.env.VITE_API_INCENTIVES}/v1/incentives`
+  INCENTIVES: `http://${HOST}:${import.meta.env.VITE_API_INCENTIVES}/v1/incentives`,
+  PRODUCTS: `http://${HOST}:${import.meta.env.VITE_API_PRODUCT}/products`,
+  CONFIGURATION: `http://${HOST}:${import.meta.env.VITE_API_INCENTIVES}/v1/stablishment-configurations`,
 };
 

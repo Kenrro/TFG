@@ -8,14 +8,17 @@ import org.springframework.stereotype.Service;
 
 import com.stablishmentservice.stablishmentservice.dto.authorization.CreateStablishmentUserResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.authorization.UsersIdsRequestDto;
+import com.stablishmentservice.stablishmentservice.dto.authorization.UsersQuantityResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.authorization.UsersDto;
 import com.stablishmentservice.stablishmentservice.dto.incentive.configuration.StablishmentConfigurationCreateRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.incentive.configuration.StablishmentConfigurationResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.products.DeletedProductsResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.AdminUserRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentAndAdminResponseDto;
+import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentDashboardResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentResponseDto;
+import com.stablishmentservice.stablishmentservice.dto.stablishment.TransactionInformationDto;
 import com.stablishmentservice.stablishmentservice.entity.Stablishment;
 import com.stablishmentservice.stablishmentservice.entity.UserStablishment;
 import com.stablishmentservice.stablishmentservice.enums.StablishmentError;
@@ -45,6 +48,10 @@ public class StablishmentService {
     private String productServiceUrl;
     @Value("${app.servicescredential.incentive-service-stablishment-configuration-url}")
     private String configurationServiceUrl;
+    @Value("${app.servicescredential.transactinonServiceUrl}")
+    private String transactionServiceUrl;
+    @Value("${app.servicescredential.incentive-service-incentive-url}")
+    private String incentiveServiceUrl;
 
     // =========================================================
     // GET METHODS
@@ -95,7 +102,7 @@ public class StablishmentService {
             // 2. Call to auth service for crete admin with admin role
             admin.setRole("ADMIN");
             CreateStablishmentUserResponseDto response = webClientService.securePostMethod(
-                authServiceUrl + "/create-establishment-admin",
+                authServiceUrl + "/create/establishment-admin",
                 admin, 
                 CreateStablishmentUserResponseDto.class);           
             adminId = response.getAdminId(); // get user id
@@ -123,7 +130,7 @@ public class StablishmentService {
         // 2️⃣ Rollback manual (solo para errores técnicos)
         if (adminId != null) {
             webClientService.secureDeleteMethod(
-                authServiceUrl + "/delete-employee/" + adminId,
+                authServiceUrl + "/employees/" + adminId,
                 Void.class
             );
         }
@@ -177,14 +184,14 @@ public class StablishmentService {
         List<Long> usersIds = userStablishmentService.getAllUsersIdByStablishmentId(stablishmentId);
         try {
             // Remove all users who are registered at the establishment
-            deleteUsersResponseDto = webClientService.securePostMethod(authServiceUrl + "/delete-employees", 
+            deleteUsersResponseDto = webClientService.securePostMethod(authServiceUrl + "/delete/employees", 
                 UsersIdsRequestDto.builder()
                     .userIds(usersIds)
                     .build(),
                     UsersDto.class);
             // Remove all productos from products service
             deletedProducts = webClientService.secureDeleteMethod(
-                productServiceUrl + "/delete-by-code/{code}",
+                productServiceUrl + "/stablishments/{code}/products",
                 DeletedProductsResponseDto.class ,
                 stablishmentCode);
             webClientService.secureDeleteMethod(
@@ -217,7 +224,7 @@ public class StablishmentService {
             try {
                 if (deletedUsers != null) {
                     webClientService.securePostMethod(
-                        authServiceUrl + "/rollback-delete-employees",
+                        authServiceUrl + "/employees/rollback-delete",
                         deletedUsers,
                         Void.class
                     );
@@ -263,5 +270,57 @@ public class StablishmentService {
         ).toList();
 
     }
-       
+    // =========================================================
+    // DASHBOARD
+    // =========================================================
+    public StablishmentDashboardResponseDto getStablishmentDashboard(String token) {
+        // Get all users
+        token = jwtUtil.cleanJwtToken(token);
+        String stablishmentCode = jwtUtil.getClaim(token, "establishmentCode", String.class);
+        UsersIdsRequestDto idsRequest = userStablishmentService.getAllUsers(token);
+        UsersQuantityResponseDto usersQuantity = getUsersQuantity(idsRequest);
+        // Get transaction information
+        TransactionInformationDto transactionInformation = getTransactionInformation(stablishmentCode);
+        // Get products quantity
+        int productsQuantity = getProductsQuantity(stablishmentCode);
+        // Get incentive quantity
+        int incentiveQuantity = getIncentiveQuantity(stablishmentCode);
+
+        return StablishmentDashboardResponseDto.builder()
+            .usersQuantity(usersQuantity)
+            .transactionInformation(transactionInformation)
+            .productsQuantity(productsQuantity)
+            .incentiveQuantity(incentiveQuantity)
+            .build();
+    }
+        private UsersQuantityResponseDto getUsersQuantity(
+            UsersIdsRequestDto ids
+        ) {
+            return webClientService.securePostMethod(
+                authServiceUrl + "/dashboard/search",
+                ids,
+                UsersQuantityResponseDto.class
+            );
+        }
+        private TransactionInformationDto getTransactionInformation(String stablishmentCode) {
+            return webClientService.secureGetMethod(
+                transactionServiceUrl + "/stablishment/{stablishmentCode}/dashboard",
+                TransactionInformationDto.class,
+                stablishmentCode
+            );
+        }
+        private int getProductsQuantity(String stablishmentCode) {
+            return webClientService.secureGetMethod(
+                productServiceUrl + "/stablishment/{stablishmentCode}/dashboard",
+                Integer.class,
+                stablishmentCode
+            ).intValue();
+        }
+        private int getIncentiveQuantity(String stablishmentCode) {
+            return webClientService.secureGetMethod(
+                incentiveServiceUrl + "/stablishments/{stablishmentCode}/dashboard",
+                Integer.class,
+                stablishmentCode
+            ).intValue();
+        }
 }

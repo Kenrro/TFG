@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentAndAdminRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentAndAdminResponseDto;
+import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentDashboardResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentResponseDto;
 import com.stablishmentservice.stablishmentservice.entity.Stablishment;
@@ -208,7 +209,7 @@ public class StablishmentController {
     // =========================================================
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
-    @GetMapping("/get-stablishment-code/{userId}")
+    @GetMapping("/{userId}/stablishment-code")
     @Operation(
         summary = "Get establishment code by user ID",
         description = "Retrieve the establishment code associated with a given user ID. Requires SERVICE role.",
@@ -229,7 +230,7 @@ public class StablishmentController {
     // =========================================================
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("/get-stablihsments-by-token")
+    @GetMapping("/stablishments/me")
     @Operation(
         summary = "Get establishments for the current user",
         description = "Retrieve establishments associated with the current user from the token. Requires CUSTOMER role.",
@@ -287,7 +288,7 @@ public class StablishmentController {
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("/get-stablishment-by-code/{code}")
+    @GetMapping("/{code}/stablishments")
     @Operation(
         summary = "Get establishment by code",
         description = "Retrieve an establishment using its unique code. Requires SERVICE role.",
@@ -332,5 +333,56 @@ public class StablishmentController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/dashboard")
+    @Operation(
+        summary = "Get establishment dashboard information",
+        description = "Retrieve dashboard information for the establishment associated with the current user. Requires ADMIN role.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Dashboard information retrieved successfully",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = StablishmentDashboardResponseDto.class),
+                    examples = {
+                        @ExampleObject(
+                            name = "Dashboard response",
+                            summary = "Example dashboard information",
+                            value = """
+                            {
+                                "usersQuantity": {
+                                    "totalUsers": 150,
+                                    "activeUsers": 120,
+                                    "inactiveUsers": 30
+                                },
+                                "transactionInformation": {
+                                    "redeemedProducts": 500,
+                                    "pointsAwarded": 2500
+                                },
+                                "productsQuantity": 50,
+                                "incentiveQuantity": 10
+                            }
+                            """
+                        )
+                    }
+                )
+            ),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - invalid or missing token"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - ADMIN role required")
+        }
+    )
+    public ResponseEntity<StablishmentDashboardResponseDto> getStablishmentDashboard(
+            @RequestHeader("Authorization")
+            @Parameter(description = "Bearer token for authentication")
+            String authHeader
+    ) {
+
+        StablishmentDashboardResponseDto dashboardInfo =
+                stablishmentService.getStablishmentDashboard(authHeader);
+
+        return ResponseEntity.ok(dashboardInfo);
+    }
     
 }

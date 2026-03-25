@@ -29,3 +29,19 @@ export async function updateRedeemTransaction(id) {
         body: JSON.stringify({ id })
     })
 }
+export async function getGivePointsTransactions() {
+    return request(`${API.TRANSACTION}/points`, {
+        method: 'GET'
+    })
+}
+export async function getRedeemTransactions() {
+    return request(`${API.TRANSACTION}/redeem`, {
+        method: 'GET'
+    })
+}
+
+export async function getIncentiveQuantity() {
+    return request(`${API.TRANSACTION}/incentives-quantity`, {
+        method: 'GET'
+    })
+}

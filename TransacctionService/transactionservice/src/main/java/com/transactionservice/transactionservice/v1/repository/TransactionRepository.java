@@ -1,7 +1,7 @@
 package com.transactionservice.transactionservice.v1.repository;
 
+import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -49,4 +49,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>{
             @Param("stablishmentCode") String stablishmentCode,
             @Param("type") TransactionType type
     );
+    @Transactional
+    @Modifying
+    @Query("""
+        UPDATE Transaction t
+        SET t.status = 'EXPIRED'
+        WHERE t.status = 'PENDING'
+        AND t.expiresAt < :now
+    """)
+    int expireOldTransactions(@Param("now") Instant now);
 }

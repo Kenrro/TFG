@@ -30,9 +30,9 @@ public class ProductService {
     // CREATE PRODUCT
     // =========================================================
     public void createProduct(String token, ProductCreateRequestDto request) {
-        String code = jwtUtil.cleanJwtToken(token);
-        code = jwtUtil.getClaim(code, "establishmentCode", String.class);
-        webClientService.secureGetMethod(stablishmentServiceUrl + "/get-stablishment-by-code/{code}", StablishmentResponseDto.class, code).getCode();
+        token = jwtUtil.cleanJwtToken(token);
+        String code = jwtUtil.getClaim(token, "establishmentCode", String.class);
+        ;
         
         productCRUDService.create(code ,request);
     }
@@ -93,7 +93,7 @@ public class ProductService {
             Long productId
         ) {
             webClientService.secureDeleteMethod(
-                incentiveServiceUrl + "/delete-by-product-id/{productId}", 
+                incentiveServiceUrl + "/products/{productId}/incentives", 
                 Void.class, 
                 productId);
         }
@@ -113,7 +113,7 @@ public class ProductService {
         ).toList();
         try{
             webClientService.secureDeleteMethod(
-                incentiveServiceUrl + "/delete-by-stablishment/{stablishmentCode}", 
+                incentiveServiceUrl + "/stablishments/{stablishmentCode}/incentives", 
                 Void.class, 
                 stablishmentCode);
             productCRUDService.deleteProductsByStablishment(stablishmentCode);
@@ -141,5 +141,8 @@ public class ProductService {
         
         ).toList();
 
+    }
+    public Integer getProductsQuantity(String stablishmentCode) {
+        return productCRUDService.findAllByStablishmentCode(stablishmentCode).size();
     }
 }

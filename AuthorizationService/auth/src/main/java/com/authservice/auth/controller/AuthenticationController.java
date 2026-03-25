@@ -11,9 +11,11 @@ import com.authservice.auth.dto.auth.AuthRegisterEmployeeRequestDTO;
 import com.authservice.auth.dto.auth.AuthResponseDto;
 import com.authservice.auth.dto.auth.AuthUpdateCustomerRequestDto;
 import com.authservice.auth.dto.auth.AuthUpdateEmployeeRequestDto;
+import com.authservice.auth.dto.auth.ChangePassWordDto;
 import com.authservice.auth.dto.auth.UsersDto;
 import com.authservice.auth.dto.stablisment.RollbackDeleteEmployeesRequestDto;
 import com.authservice.auth.dto.stablisment.UsersIdsRequestDto;
+import com.authservice.auth.dto.stablisment.UsersQuantityResponseDto;
 import com.authservice.auth.service.authentication.AuthenticationCustomerService;
 import com.authservice.auth.service.authentication.AuthenticationEmployeeService;
 
@@ -78,7 +80,7 @@ public class AuthenticationController {
     // =========================================================
     // REGISTER CUSTOMER
     // =========================================================
-    @PostMapping("/register-customer")
+    @PostMapping("/customers")
     @Operation(
         summary = "Register a new customer",
         description = "Endpoint to register a new customer in the system.",
@@ -124,7 +126,7 @@ public class AuthenticationController {
     // =========================================================
     // LOGIN CUSTOMER
     // =========================================================
-    @PostMapping("/login-customer")
+    @PostMapping("/login/customers")
     @Operation(
         summary = "Customer login",
         description = "Endpoint for customers to log in to the system.",
@@ -183,7 +185,7 @@ public class AuthenticationController {
     // =========================================================
     // UPDATE CUSTOMER
     // =========================================================
-    @PutMapping("/update-customer")
+    @PutMapping("/customers")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
@@ -240,7 +242,7 @@ public class AuthenticationController {
     // TODO: al eliminar si no hay relaciones da error
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @SecurityRequirement(name = "bearerAuth")
-    @DeleteMapping("/delete-customer")
+    @DeleteMapping("/customers")
     @Operation(
         summary = "Delete an existing customer",
         description = "Endpoint to delete an existing customer from the system.",
@@ -267,7 +269,7 @@ public class AuthenticationController {
     // =========================================================
     @PreAuthorize("hasAuthority('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @PostMapping("/register-employee")
+    @PostMapping("/employees")
     // Only admin can register employee
     @Operation(
         summary = "Register a new employee",
@@ -320,7 +322,7 @@ public class AuthenticationController {
     // UPDATE EMPLOYEE
     // =========================================================
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PutMapping("/update-employee/{id}")
+    @PutMapping("/employees/{id}")
     @Operation(
 
         summary = "Update an existing employee",
@@ -377,7 +379,7 @@ public class AuthenticationController {
     // =========================================================
     // LOGIN EMPLOYEE
     // =========================================================
-    @PostMapping("/login-employee") // Seller and Admin login
+    @PostMapping("/login/employees") // Seller and Admin login
     @PermitAll
     @Operation(
         summary = "Employee login",
@@ -444,7 +446,7 @@ public class AuthenticationController {
     // Admin Endpoints
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
-    @PostMapping("/create-establishment-admin") // Is used to create the first admin of an establishment, called by the establishment service
+    @PostMapping("/create/establishment-admin") // Is used to create the first admin of an establishment, called by the establishment service
     @Operation(
         summary = "Create establishment admin",
         description = "Endpoint to create the first admin of an establishment, called by the establishment service.",
@@ -469,7 +471,7 @@ public class AuthenticationController {
     // DELETE AN EMPLOYEE
     // =========================================================
     @PreAuthorize("hasAuthority('ADMIN') or hasRole('SERVICE')")
-    @DeleteMapping("/delete-employee/{id}")
+    @DeleteMapping("/employees/{id}")
     @Operation(
         summary = "Delete an existing employee",
         description = "Endpoint to delete an existing employee from the system. Only accessible by admins.",
@@ -500,7 +502,7 @@ public class AuthenticationController {
     // =========================================================
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
-    @PostMapping("/delete-employees")
+    @PostMapping("/delete/employees")
     @Operation(
         summary = "Delete multiple employees",
         description = "Endpoint to delete multiple employees from the system. Only accessible by service role.",
@@ -561,7 +563,7 @@ public class AuthenticationController {
     // =========================================================
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
-    @PostMapping("/rollback-delete-employees")
+    @PostMapping("/employees/rollback-delete")
      @Operation(
         summary = "Rollback delete employees",
         description = "Endpoint to rollback the deletion of multiple employees in the system. Only accessible by service role.",
@@ -585,15 +587,51 @@ public class AuthenticationController {
     // GET METHODS
     @Hidden
     @PreAuthorize("hasRole('SERVICE')")
-    @PostMapping("/get-all-employees")
-    public ResponseEntity<UsersDto> getUsers(
+    @PostMapping("/employees/search")
+    public ResponseEntity<UsersDto> getEmployees(
         @RequestBody UsersIdsRequestDto request
     ) {
         UsersDto users = authenticationEmployeeService.getAllUsers(request);
         users.getUsers().stream().forEach(user -> System.out.println(user.getUsername()));
         return ResponseEntity.ok(users);
     }
+    @Hidden
+    @PreAuthorize("hasRole('SERVICE')")
+    @PostMapping("/customers/search")
+    public ResponseEntity<UsersDto> getCustomers(
+        @RequestBody UsersIdsRequestDto request
+    ) {
+        UsersDto users = authenticationCustomerService.getAllUsers(request);
+        users.getUsers().stream().forEach(user -> System.out.println(user.getUsername()));
+        return ResponseEntity.ok(users);
+    }
+    @Hidden
+    @PreAuthorize("hasRole('SERVICE')")
+    @PostMapping("/dashboard/search")
+    public ResponseEntity<UsersQuantityResponseDto> getUsersQuantity(
+        @RequestBody UsersIdsRequestDto request
+    ) {
+        UsersQuantityResponseDto response = authenticationEmployeeService.getUsersQuantity(request);
+        return ResponseEntity.ok(response);
+    }
     
-    
+    @Operation(
+    summary = "Change employee password",
+    description = "Allows ADMIN to change an employee password.",
+    responses = {
+        @ApiResponse(responseCode = "200", description = "Password updated successfully"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    }
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/employees/{id}/password")
+    public ResponseEntity<Void> changePassword(
+            @PathVariable Long id,
+            @RequestBody ChangePassWordDto dto
+    ) {
+        authenticationEmployeeService.changePassword(id, dto.getNewPassword());
+        return ResponseEntity.ok().build();
+    }
     
 }

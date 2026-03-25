@@ -1,0 +1,74 @@
+/* GROUPS */
+.group {
+  margin-bottom: 24px;
+  
+}
+
+.group-title {
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  
+}
+
+/* CARD FULL WIDTH */
+.full {
+  margin-bottom: 24px;
+}
+
+/* Ajuste tarjetas pequeñas */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+.big {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* COLORES */
+.users .card-icon {
+  background: #e8f0ff;
+  color: #3b82f6;
+}
+
+.transactions .card-icon {
+  background: #e6f9f0;
+  color: #10b981;
+}
+
+.products .card-icon {
+  background: #fff4e6;
+  color: #f59e0b;
+}
+
+.incentives .card-icon {
+  background: #f3e8ff;
+  color: #a855f7;
+}
+
+.card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -6,17 +6,22 @@ import org.springframework.web.bind.annotation.RestController;
 import com.transactionservice.transactionservice.v1.dto.transaction.CreateGivePointsTransactionRequestDto;
 import com.transactionservice.transactionservice.v1.dto.transaction.CreateRedeemTransactionRequestDto;
 import com.transactionservice.transactionservice.v1.dto.transaction.GivePointsTransactionsResponseDto;
+import com.transactionservice.transactionservice.v1.dto.transaction.IncentiveQuantityResponseDto;
 import com.transactionservice.transactionservice.v1.dto.transaction.RedeemProductTransactionsResponseDto;
+import com.transactionservice.transactionservice.v1.dto.transaction.TransactionInformationDto;
 import com.transactionservice.transactionservice.v1.dto.transaction.TransactionUUIDDto;
 import com.transactionservice.transactionservice.v1.service.transaction.TransactionService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 @RestController
@@ -241,6 +248,70 @@ public class TransactionController {
                 transactionService.getRedeemProductTransaction(token)
         );
     }
+    @PreAuthorize("hasAuthority('SERVICE')")
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/stablishment/{stablishmentCode}/dashboard")
+    public ResponseEntity<TransactionInformationDto> getTransactionsInformation(
+            @PathVariable String stablishmentCode
+    ) {
+
+        return ResponseEntity.ok(
+                transactionService.getTransactionsInformation(stablishmentCode)
+        );
+    }
+    // =========================================================
+    // GET REDEEM TRANSACTIONS
+    // =========================================================
+    @Operation(
+        summary = "Get incentives usage quantity",
+        description = "Returns how many times each incentive has been redeemed for the authenticated establishment. Requires ADMIN role.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Incentive quantities retrieved successfully",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = IncentiveQuantityResponseDto.class),
+                    examples = {
+                        @ExampleObject(
+                            name = "Incentive quantity response",
+                            summary = "Example response",
+                            value = """
+                            [
+                            {
+                                "incentiveId": 1,
+                                "quantity": 5
+                            },
+                            {
+                                "incentiveId": 2,
+                                "quantity": 2
+                            }
+                            ]
+                            """
+                        )
+                    }
+                )
+            ),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Forbidden - ADMIN role required"
+            )
+        }
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/incentives-quantity")
+    public ResponseEntity<List<IncentiveQuantityResponseDto>> getIncentivesQuantity(
+        @RequestHeader("Authorization") 
+        @Parameter(description = "Bearer token for authentication")
+        String token
+    ) {
+        return ResponseEntity.ok(
+            transactionService.getIncentiveQuantity(token)
+        );
+    }
+    
+    
 
     
     

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.incentiveservice.incentiveservice.v1.dto.stablishmentconfiguration.UsersIdsRequestDto;
 import com.incentiveservice.incentiveservice.v1.dto.userpoints.UsersPointsDto;
 import com.incentiveservice.incentiveservice.v1.entity.UserPoints;
 import com.incentiveservice.incentiveservice.v1.enums.UserPointsError;
@@ -133,6 +134,9 @@ public class UserPointsCRUDService {
                 UserPointsError.INVALID_USER_ID
             );
         }
+    }
+    public List<UserPoints> findAll(UsersIdsRequestDto request, String code) {
+        return userPointsRepository.findAllByUsersId(request.getUserIds(), code);
     }
 
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/RegisterCustomer.css";
 import { registerCustomer } from "../../services/authService";
+import Input from "../../components/ui/Input";
 
 export default function RegisterCustomer() {
   const [form, setForm] = useState({
@@ -12,6 +13,9 @@ export default function RegisterCustomer() {
   });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [confirmPassword, setConfirmPassword] = useState("");
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -22,6 +26,10 @@ export default function RegisterCustomer() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    if (form.password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
     setLoading(true);
 
     try {
@@ -65,14 +73,60 @@ export default function RegisterCustomer() {
           required
         />
 
-        <input
-          name="password"
-          type="password"
-          placeholder="Contraseña"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
+        <div style={{ position: "relative" }}>
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  onChange={(value) =>
+                    setForm({ ...form, password: value })
+                  }
+                />
+        
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: 10,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    fontSize: "14px"
+                  }}
+                >
+                  {showPassword ? "🙈" : "👁"}
+                </span>
+              </div>
+              <div style={{ position: "relative" }}>
+              <Input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Repeat password"
+                onChange={(v) => setConfirmPassword(v)}
+              />
+        
+              <span
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{
+                  position: "absolute",
+                  right: 10,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  fontSize: "14px"
+                }}
+              >
+                {showConfirmPassword ? "🙈" : "👁"}
+              </span>
+            </div>
+            {confirmPassword && (
+              <span style={{
+                fontSize: "12px",
+                color: form.password === confirmPassword ? "green" : "red"
+              }}>
+                {form.password === confirmPassword
+                  ? "Passwords match"
+                  : "Passwords do not match"}
+              </span>
+            )}
 
       {error && <p className="auth-error">{error}</p>}
       <p className="login__register">

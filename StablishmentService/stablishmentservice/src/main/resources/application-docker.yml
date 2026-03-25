@@ -15,3 +15,5 @@ app:
     productServiceUrl: http://product-service:8080/products
     incentive-service-user-points-url: http://incentive-service:8080/v1/user-points
     incentive-service-stablishment-configuration-url: http://incentive-service:8080/v1/stablishment-configurations
+    transactinonServiceUrl: http://transaction-service:8080/v1/transactions
+    incentive-service-incentive-url: http://incentive-service:8080/v1/incentives

@@ -29,8 +29,7 @@ public class JwtFilter extends OncePerRequestFilter{
         String path = request.getServletPath();
         return path.startsWith("/h2-console") 
             || path.startsWith("/swagger-ui") 
-            || path.startsWith("/v3/api-docs") 
-            || path.startsWith("/products");
+            || path.startsWith("/v3/api-docs");
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request,
