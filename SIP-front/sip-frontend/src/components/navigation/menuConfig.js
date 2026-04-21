@@ -40,12 +40,12 @@ export const MENU_CONFIG = {
     },
     {
       label: "Empleados",
-      path: "/staff/management",
+      path: "/admin/management",
       icon: "👥"
     },
     {
       label: "Información personal",
-      path: "/staff/info",
+      path: "/admin/info",
       icon: "ℹ️"
     },
     {

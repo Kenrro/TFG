@@ -5,8 +5,8 @@ import { decodeToken } from "../../utils/jwt";
 import { getStablishments } from "../../services/stablishmentService";
 import "../../styles/staffInfo.css";
 import ErrorState from "../../components/ui/ErrorState";
-import ChangePasswordModal from "./ChangePasswordModal";
-import { changePassword, updateEmployee } from "../../services/authService";
+import BackArrow from "../../components/ui/BackArrow";
+
 
 export default function StaffInfo() {
 
@@ -17,17 +17,6 @@ export default function StaffInfo() {
   const [establishment, setEstablishment] = useState(null);
   const [errorConnecting, setErrorConnecting] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  const [isEditing, setIsEditing] = useState(false);
-
-  const [form, setForm] = useState({
-    name: user?.name || "",
-    lastname: user?.lastname || "",
-    username: user?.sub || "",
-    role: "ADMIN"
-  });
-
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
   useEffect(() => {
 
     const fetchEstablishment = async () => {
@@ -54,18 +43,10 @@ export default function StaffInfo() {
     fetchEstablishment();
 
   }, []);
-  async function handleUpdateProfile() {
-    try {
-      await updateEmployee(user.id, form); // o endpoint tuyo
 
-      setIsEditing(false);
-    } catch (err) {
-      console.error(err);
-    }
-  }
   return (
     <AppLayout>
-
+      <BackArrow></BackArrow>
       <div className="staff-info-container">
 
         <h2 className="staff-info-title">
@@ -74,73 +55,14 @@ export default function StaffInfo() {
 
         <div className="info-card">
 
-        <h3>User information</h3>
+          <h3>User information</h3>
 
-        {/* NAME */}
-        <p>
-          <strong>Name:</strong>{" "}
-          {isEditing ? (
-            <input
-              value={form.name}
-              onChange={(e) =>
-                setForm({ ...form, name: e.target.value })
-              }
-            />
-          ) : (
-            user?.name
-          )}
-        </p>
-
-        {/* LASTNAME */}
-        <p>
-          <strong>Lastname:</strong>{" "}
-          {isEditing ? (
-            <input
-              value={form.lastname}
-              onChange={(e) =>
-                setForm({ ...form, lastname: e.target.value })
-              }
-            />
-          ) : (
-            user?.lastname
-          )}
-        </p>
-
-        {/* USERNAME */}
-        <p>
-          <strong>Phone:</strong>{" "}
-          {isEditing ? (
-            <input
-              value={form.username}
-              onChange={(e) =>
-                setForm({ ...form, username: e.target.value })
-              }
-            />
-          ) : (
-            user?.sub
-          )}
-        </p>
-
-        <p><strong>Role:</strong> {user?.role}</p>
-
-        {/* ACTIONS */}
-        <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
-
-          {isEditing ? (
-            <>
-              <button onClick={handleUpdateProfile}>💾 Save</button>
-              <button onClick={() => setIsEditing(false)}>❌ Cancel</button>
-            </>
-          ) : (
-            <>
-              <button onClick={() => setIsEditing(true)}>✏️ Edit</button>
-              <button onClick={() => setShowPasswordModal(true)}>🔑 Change password</button>
-            </>
-          )}
+          <p><strong>Name:</strong> {user?.name}</p>
+          <p><strong>Lastname:</strong> {user?.lastname}</p>
+          <p><strong>Phone:</strong> {user?.sub}</p>
+          <p><strong>Role:</strong> {user?.role}</p>
 
         </div>
-
-      </div>
 
         
         {loading && <p>Loading establishment...</p>}
@@ -166,15 +88,7 @@ export default function StaffInfo() {
         )}
 
       </div>
-        {showPasswordModal && (
-          <ChangePasswordModal
-            userId={user.id}
-            onClose={() => setShowPasswordModal(false)}
-            onSubmit={async (id, newPassword) => {
-              await changePassword(id, { newPassword });
-            }}
-          />
-        )}
+
     </AppLayout>
   );
-}
+}  

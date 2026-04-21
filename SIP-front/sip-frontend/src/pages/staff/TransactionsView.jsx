@@ -1,14 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AppLayout from "../../components/layouts/AppLayout";
 import "../../styles/transactionsView.css";
 import { getGivePointsTransactions, getRedeemTransactions } from "../../services/transactionService";
 import BackArrow from "../../components/ui/BackArrow";
+import Draggable from "react-draggable";
+
+import AdminLayout from "../../components/layouts/AdminLayout";
+import { useStablishmentContext } from "../../contex/StablishmentContext";
 
 export default function TransactionsView() {
 
+  const nodeRef = useRef(null)
+  // Transactions
   const [redeemTx, setRedeemTx] = useState([]);
   const [pointsTx, setPointsTx] = useState([]);
-
+  // user card
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const { employees } = useStablishmentContext();
+  // Get give points transactions
   useEffect(() => {
     async function request() {
         try{
@@ -21,6 +30,7 @@ export default function TransactionsView() {
     }
     request()
   }, []);
+  // Get redeem transactions
   useEffect(() => {
     async function request() {
         try{
@@ -33,12 +43,12 @@ export default function TransactionsView() {
     }
     request()
   }, []);
-
+  // format date
   const formatDate = (date) => {
     if (!date) return "-";
     return new Date(date).toLocaleString();
   };
-
+  // Status type`s
   const getStatusClass = (status) => {
     switch (status) {
       case "COMPLETED":
@@ -57,7 +67,7 @@ export default function TransactionsView() {
   };
 
   return (
-    <AppLayout>
+    <>
       <BackArrow></BackArrow>
       <div className="transactions-container">
 
@@ -92,7 +102,21 @@ export default function TransactionsView() {
                   <td>{tx.productId}</td>
                   <td>{tx.incentiveId}</td>
                   <td>{tx.customerId || "-"}</td>
-                  <td>{tx.employeeId || "-"}</td>                  
+                  <td>
+                    {tx.employeeId ? (
+                      <span
+                        style={{ cursor: "pointer", color: "#3b82f6" }}
+                        onClick={() => {
+                          const emp = employees.data?.find(
+                            (e) => e.userId.id === tx.employeeId
+                          );
+                          setSelectedEmployee(emp);
+                        }}
+                      >
+                        {tx.employeeId}
+                      </span>
+                    ) : "-"}
+                  </td>               
                   <td>{tx.pointsRequired}</td>                  
                   <td>{tx.status}</td>                  
                   <td>{formatDate(tx.createdAt)}</td>
@@ -133,7 +157,21 @@ export default function TransactionsView() {
                   <td>{tx.pointsGiven}</td>
 
                   <td>{tx.customerId || "-"}</td>
-                  <td>{tx.employeeId || "-"}</td>
+                  <td>
+                    {tx.employeeId ? (
+                      <span
+                        style={{ cursor: "pointer", color: "#3b82f6" }}
+                        onClick={() => {
+                          const emp = employees.data?.find(
+                            (e) => e.userId.id === tx.employeeId
+                          );
+                          setSelectedEmployee(emp);
+                        }}
+                      >
+                        {tx.employeeId}
+                      </span>
+                    ) : "-"}
+                  </td>   
 
                   <td>
                     <span className={getStatusClass(tx.status)}>
@@ -152,7 +190,25 @@ export default function TransactionsView() {
         </div>
 
       </div>
+      {selectedEmployee && (
+        <Draggable nodeRef={nodeRef}>
 
-    </AppLayout>
+          <div className="employee-card" ref={nodeRef}>
+            <h4>
+              {selectedEmployee.userId.name} {selectedEmployee.userId.lastname}
+            </h4>
+
+            <p><strong>Username:</strong> {selectedEmployee.userId.username}</p>
+            <p><strong>Role:</strong> {selectedEmployee.userId.role}</p>
+            <p><strong>Joined:</strong> {formatDate(selectedEmployee.registeredAt)}</p>
+
+            <button onClick={() => setSelectedEmployee(null)}>
+              Close
+            </button>
+          </div>
+        </Draggable>
+      )}
+
+    </>
   );
 }

@@ -15,10 +15,10 @@ export async function registerCustomer(data) {
   return request(`${API.AUTH}/customers`, {"method": "POST", "body": JSON.stringify(data)});
 }
 export async function updateCustomer(data) {
-  return request(`${API.AUTH}/customer`, {"method": "PUT", "body": JSON.stringify(data)});
+  return request(`${API.AUTH}/customers`, {"method": "PUT", "body": JSON.stringify(data)});
 }
 export async function deleteCustomer() {
-  return request(`${API.AUTH}/customer`, {"method": "DELETE"});
+  return request(`${API.AUTH}/customers`, {"method": "DELETE"});
 }
 export async function updateEmployee(id, data) {
   return request(`${API.AUTH}/employees/${id}`, {

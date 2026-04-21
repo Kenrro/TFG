@@ -6,8 +6,13 @@ import Button from "../../components/ui/Button";
 import "../../styles/scan.css";
 import { updateRedeemTransaction } from "../../services/transactionService";
 import QrScanner from "../../components/QR/QrScanner";
+import ErrorModal from "./ErrorModal";
+import BackArrow from "../../components/ui/BackArrow";
+
 
 export default function CustomerScanView() {
+
+  const [error, setError] = useState(null);
 
   const [code, setCode] = useState("");
   const [message, setMessage] = useState(null);
@@ -66,6 +71,11 @@ export default function CustomerScanView() {
         setMessage("This code was already used.");
       }
 
+      else if (error.status === 410) {
+        setType("error");
+        setMessage("This code has expired.");
+      }
+      
       else {
         setType("error");
         setMessage("Something went wrong.");
@@ -78,7 +88,7 @@ export default function CustomerScanView() {
 
   return (
     <AppLayout>
-
+      <BackArrow></BackArrow>
       <div className="scan-container">
 
         <h2 className="scan-title">
@@ -112,7 +122,12 @@ export default function CustomerScanView() {
         </Button>
 
       </div>
-
+        {error && (
+        <ErrorModal
+          message={error}
+          onClose={() => setError(null)}
+        />
+    )}
     </AppLayout>
   );
 }

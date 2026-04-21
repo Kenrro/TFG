@@ -1,3 +1,4 @@
+
 export default async function request(path, options = {}) {
 
   const token = localStorage.getItem("token");
@@ -18,7 +19,7 @@ export default async function request(path, options = {}) {
       window.location.href = "/login";
     }
 
-    // 👇 controlar 204 antes de leer body
+    // controlar 204 antes de leer body
     if (res.status === 204) {
       return null;
     }
@@ -34,12 +35,23 @@ export default async function request(path, options = {}) {
         data = text;
       }
     }
+    // if (!res.status === 400) {
+    //   const error = new Error(
+    //     data?.message ||
+    //     data?.error ||
+    //     "API_ERROR"
+    //   );
+    // }
 
     if (!res.ok) {
       console.log(res)
+      console.log(data)
       const error = new Error(
         data?.message ||
         data?.error ||
+        (data?.reasons && typeof data.reasons === "object"
+          ? Object.values(data.reasons).join(", ")
+          : data?.reasons) ||
         "API_ERROR"
       );
 

@@ -31,8 +31,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
 
-
-
 @RestController
 @RequestMapping("/v1/stablishment-configurations")
 @RequiredArgsConstructor
@@ -41,7 +39,7 @@ public class StablishmentConfigurationController {
 
     private final StablishmentConfigurationService stablishmentConfigurationService;
     // =========================================================
-    // GET STABLISHMENT CONFIGURATION
+    // GET STABLISHMENT CONFIGURATION BY TOKEN
     // =========================================================
     @Operation(
         summary = "Get stablishment configuration",
@@ -82,9 +80,22 @@ public class StablishmentConfigurationController {
     ) {
 
         return ResponseEntity.ok(
-                stablishmentConfigurationService.getByStablishmentCode(token)
+                stablishmentConfigurationService.getByToken(token)
         );
     }
+    // =========================================================
+    // GET CONFIGURATION FROM CODE
+    // =========================================================
+    @PreAuthorize("hasRole('SERVICE')")
+    @GetMapping("/stablishment/{code}/configuration")
+    public ResponseEntity<StablishmentConfigurationResponseDto> getStablishmentConfigurationByCode(
+        @PathVariable("code") String code
+    ) {
+        return ResponseEntity.ok(
+            stablishmentConfigurationService.getByStablishmentCode(code)
+        );
+    }
+    
     // =========================================================
     // CREATE STABLISHMENT CONFIGURATION
     // =========================================================

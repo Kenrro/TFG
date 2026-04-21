@@ -27,6 +27,10 @@ export async function createEstablishment(form) {
 export async function getStablishments() {
   return request(`${API.STABLISHMENT}/stablishments/me`, {"method": "GET"});
 }
+
+export async function getStablishmentsByAdminRole(){
+  return request(`${API.STABLISHMENT}/admin/stablishment`, {"method": "GET"});
+}
 export async function updateStablishment(data) {
   return request(`${API.STABLISHMENT}`, {"method": "PUT", "body": JSON.stringify(data)});
 }

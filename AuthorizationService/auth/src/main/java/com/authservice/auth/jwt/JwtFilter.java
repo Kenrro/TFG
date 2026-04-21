@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.authservice.auth.enums.AuthorizationError;
+import com.authservice.auth.exception.GeneralException;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -42,7 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
             if (jwtUtil.isTokenValid(token)) {
                 Claims claims = jwtUtil.getClaims(token); // obtiene todos los claims
                 String username = claims.getSubject();
-                String role = claims.get("role", String.class); // ej: "ROLE_SERVICE"
+                String role = claims.get("role", String.class); // ej: "ROLE_SERVICE" o "SERVICE" para authority
 
                 List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
@@ -50,6 +52,8 @@ public class JwtFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(username, null, authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                throw new GeneralException(AuthorizationError.EXPIRED_TOKEN);
             }
         }
 

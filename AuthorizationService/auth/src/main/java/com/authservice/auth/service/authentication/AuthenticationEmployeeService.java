@@ -98,6 +98,9 @@ public class AuthenticationEmployeeService {
     // =========================================================
     @Transactional
     public void registerEmployee(AuthRegisterEmployeeRequestDTO request) {
+        if (userRepository.findEmployee(request.getUsername()).isPresent()) {
+            throw new GeneralException(AuthError.ALREDY_EXIST_A_USER_WITH_THE_SAME_PHONE);
+        }
         User user = User.builder()
             .username(request.getUsername())
             .password(passwordEncoder.encode(request.getPassword()))

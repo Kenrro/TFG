@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public enum AuthorizationError implements IError {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid or missing authentication token."),
-
+    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "Authentication token has expired.")
     ;
     private final String message;
     private final HttpStatus httpStatus;

@@ -35,8 +35,9 @@ export default function CustomerEstablishmentView() {
         setPoints(wallet.balance);
 
         const incentivesData = await getIncentives(code);
-
-        setIncentives(incentivesData.incentives || []);
+        console.log(incentivesData)
+        const incentivesFiltered = incentivesData.incentives.filter(i => i.incentiveResponseDto.active);
+        setIncentives(incentivesFiltered || []);
 
       } catch (err) {
         console.error(err);

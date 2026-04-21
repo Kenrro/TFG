@@ -4,6 +4,7 @@ import Button from "../../components/ui/Button";
 import BackArrow from "../../components/ui/BackArrow";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import CreateIncentiveForm from "../../components/ui/CreateIncentiveForm"
+import AdminLayout from "../../components/layouts/AdminLayout";
 
 import {
   getIncentives,
@@ -16,6 +17,7 @@ import { decodeToken } from "../../utils/jwt";
 import "../../styles/IncentivesView.css"
 import { getProducts } from "../../services/productsService";
 import { getIncentiveQuantity } from "../../services/transactionService";
+import ErrorModal from "./ErrorModal";
 
 export default function IncentivesView() {
   const {token} = useAuth()
@@ -31,6 +33,8 @@ export default function IncentivesView() {
   const [editAvailable, setEditAvailable] = useState()
   const [products, setProducts] = useState()
   const [incentivesQuantity, setIncentivesQuantity] = useState([])
+
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     fetchIncentives();
@@ -71,6 +75,7 @@ export default function IncentivesView() {
         setIncentivesQuantity(response)
       } catch(err) {
         console.log(err)
+        setError(err.message)
       }
     }
     request()
@@ -84,6 +89,7 @@ export default function IncentivesView() {
       setIncentives(res.incentives);
     } catch (err) {
       console.error(err);
+      setError(err.message)
     }
   }
 
@@ -94,6 +100,7 @@ export default function IncentivesView() {
       setRefresh(!refresh);
     } catch (err) {
       console.error(err);
+      setError(err.message)
     }
   }
 
@@ -114,12 +121,12 @@ export default function IncentivesView() {
     try {
       await createIncentive(data)
     } catch(err) {
-      console.log(err)
+      console.log(err.message)
     }
   }
 
   return (
-    <AppLayout>
+    <>
       <div className="incentives-container">
 
         <BackArrow />
@@ -231,7 +238,7 @@ export default function IncentivesView() {
             products={products}
             onCreate={
               async (data) => {
-                await createIncentive(data)
+                await handleCreate(data)
                 setRefresh(!refresh)
                 setShowConfirm(false)
               }
@@ -249,6 +256,12 @@ export default function IncentivesView() {
           onCancel={() => setShowConfirm(false)}
         />
       )}
-    </AppLayout>
+      {error && (
+        <ErrorModal
+          message={error}
+          onClose={() => setError(null)}
+        />
+    )}
+    </>
   );
 }

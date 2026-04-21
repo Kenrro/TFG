@@ -21,6 +21,9 @@ import ProductsView from "./pages/staff/ProductsView"
 import IncentivesView from "./pages/staff/IncentivesView.jsx"
 import SettingsView from "./pages/staff/SettingsView.jsx"
 import CustomersView from "./pages/staff/CustomersView.jsx"
+import { StablishmentProvider } from "./contex/StablishmentContext.jsx"
+import AdminInfo from "./pages/staff/AdminInfo.jsx"
+import AdminLayout from "./components/layouts/AdminLayout.jsx"
 function App() {
 
   return (
@@ -103,15 +106,7 @@ function App() {
             <StaffDashboard />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute roles={["ADMIN"]}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
+        />
       <Route
         path="/staff/info"
         element={
@@ -119,7 +114,7 @@ function App() {
             <StaffInfo />
           </ProtectedRoute>
         }
-      />
+        />
       <Route
         path="/staff/give-points"
         element={
@@ -127,7 +122,7 @@ function App() {
             <StaffGivePointsView />
           </ProtectedRoute>
         }
-      />
+        />
       <Route
         path="/staff/redeem"
         element={
@@ -135,55 +130,26 @@ function App() {
             <StaffScanView />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path="/staff/management"
-        element={
-          <ProtectedRoute roles={["ADMIN"]}>
-            <StaffManagement />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/transactions"
-        element={
-          <ProtectedRoute roles={["ADMIN"]}>
-            <TransactionsView />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/products"
-        element={
-          <ProtectedRoute roles={["ADMIN"]}>
-            <ProductsView />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/incentives"
-        element={
-          <ProtectedRoute roles={["ADMIN"]}>
-            <IncentivesView />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/settings"
-        element={
-          <ProtectedRoute roles={["ADMIN"]}>
-            <SettingsView />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/customers"
-        element={
-          <ProtectedRoute roles={["ADMIN"]}>
-            <CustomersView />
-          </ProtectedRoute>
-        }
-      />
+        />
+      
+        {/*  ADMIN */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+                <AdminLayout />
+            </ProtectedRoute>
+          }
+          >
+        <Route index element={<AdminDashboard/>} />
+        <Route path="management" element={<StaffManagement />} />
+        <Route path="transactions" element={<TransactionsView />} />
+        <Route path="products" element={<ProductsView />} />
+        <Route path="incentives" element={<IncentivesView />} />
+        <Route path="settings" element={<SettingsView />} />
+        <Route path="customers" element={<CustomersView />} />
+        <Route path="info" element={<AdminInfo />} />
+      </Route>
       {/* TEMP redirect root */}
       <Route path="/" element={<Navigate to="/login" replace />} />
       {/* fallback */}

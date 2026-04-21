@@ -6,7 +6,7 @@ import AuthTabs from "../../components/ui/AuthTabs.jsx"
 import ErrorMessage from "../../components/ui/ErrorMessage.jsx"
 import { loginCustomer, loginEmployee } from "../../services/authService.js";
 import { useAuth } from "../../contex/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { required, pattern, minLength, REGEX } from "../../utils/validators";
 import useForm from "../../hooks/useForm.js";
 
@@ -15,6 +15,7 @@ export default function LoginCustomer() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const { login } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
   // Valores dinamicos para los formularios
   const FORM_CONFIG = {
     customer: {
@@ -105,17 +106,40 @@ export default function LoginCustomer() {
           onChange={handleChange("username")}
           error={errors.username}
           />
-          <Input type="password" 
-          placeholder="Password" 
-          value={values.password}
-          onChange={handleChange("password")} 
-          error={errors.password}/>
-          <p className="login__register"> 
-            ¿No tienes cuenta?{" "}
-            <span style={{color: "#11f", cursor: "pointer"}} onClick={() => navigate("/register")}>
-              Crear cuenta
-            </span>
-          </p>
+          <div style={{ position: "relative" }}>
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            value={values.password}
+                            placeholder="Password"
+                            onChange={handleChange("password")}
+                          />
+                  
+                          <span
+                            onClick={() => setShowPassword(!showPassword)}
+                            style={{
+                              position: "absolute",
+                              right: 10,
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              cursor: "pointer",
+                              fontSize: "14px"
+                            }}
+                          >
+                            {showPassword ? "🙈" : "👁"}
+                          </span>
+                        </div>
+                        <div style={{ position: "relative" }}>
+                        
+          </div>
+
+          
+          
+            <p className="login__register"> 
+              ¿No tienes cuenta?{" "}
+              <Link to="/register" style={{ color: "#11f" }}>
+                Crear cuenta
+              </Link>
+            </p> 
           <Button loading={loading} onClick={handleLoginCustomer}>
             Login as customer
           </Button>
@@ -132,13 +156,31 @@ export default function LoginCustomer() {
             error={errors.username}
           />
 
-          <Input
-            type="password"
-            placeholder="Password"
-            value={values.password}
-            onChange={handleChange("password")}
-            error={errors.password}
-          />
+          <div style={{ position: "relative" }}>
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            value={values.password}
+                            placeholder="Password"
+                            onChange={handleChange("password")}
+                          />
+                  
+                          <span
+                            onClick={() => setShowPassword(!showPassword)}
+                            style={{
+                              position: "absolute",
+                              right: 10,
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              cursor: "pointer",
+                              fontSize: "14px"
+                            }}
+                          >
+                            {showPassword ? "🙈" : "👁"}
+                          </span>
+                        </div>
+                        <div style={{ position: "relative" }}>
+                        
+          </div>
 
           <Input
             placeholder="Establishment code"
@@ -146,12 +188,12 @@ export default function LoginCustomer() {
             onChange={handleChange("establishmentCode")}
             error={errors.establishmentCode}
           />
-          <p className="login__register"> 
-            ¿Tienes un negocio?{" "}
-            <span style={{color: "#11f", cursor: "pointer"}} onClick={() => navigate("/create-establishment")}>
-              Crear establecimiento
-            </span>
-          </p>
+            <p className="login__register"> 
+              ¿Tienes un negocio?{" "}{" "}
+              <Link to="/create-establishment" style={{ color: "#11f" }}>
+                crear establecimiento
+              </Link>
+            </p>
           <Button loading={loading} onClick={handleLoginEmployee}>
             Login as employee
           </Button>

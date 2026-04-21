@@ -265,7 +265,7 @@ public class AuthenticationController {
      // End customer Endpoints
      // Employee Endpoints
     // =========================================================
-    // rEGISTER EMPLOYEE
+    // EGISTER EMPLOYEE
     // =========================================================
     @PreAuthorize("hasAuthority('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")

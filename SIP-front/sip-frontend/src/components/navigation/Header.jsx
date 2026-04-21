@@ -1,4 +1,5 @@
 import "../../styles/layout.css";
+import img from "../../assets/iconapp.png"
 
 export default function Header({ onMenuClick }) {
   return (
@@ -6,7 +7,9 @@ export default function Header({ onMenuClick }) {
       <button className="menu-btn" onClick={onMenuClick}>
         ☰
       </button>
-      <h1 className="app-title">Loyalty App</h1>
+      <div className="icon-header">
+        <img src={img} alt="SIP logo" className="header-logo" />
+      </div>
     </header>
   );
 }

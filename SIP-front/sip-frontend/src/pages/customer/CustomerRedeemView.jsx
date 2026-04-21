@@ -5,6 +5,7 @@ import Button from "../../components/ui/Button";
 import "../../styles/scan.css";
 import { redeemProduct } from "../../services/transactionService";
 import QRCode from "react-qr-code";
+import BackArrow from "../../components/ui/BackArrow";
 
 export default function CustomerRedeemView() {
 
@@ -45,20 +46,21 @@ export default function CustomerRedeemView() {
 
   return (
     <AppLayout>
-
+      <BackArrow></BackArrow>
       <div className="redeem-container">
 
         <h2 className="redeem-title">
           Show this code to the employee
         </h2>
-
-        <QRCode
-          value={JSON.stringify(transaction) || "No transaction ID"}
-          size={256}
-          bgColor="#ffffff"
-          fgColor="#000000"
-          level="H"
-        />
+        <div className="qr-box">
+          <QRCode
+            value={JSON.stringify(transaction) || "No transaction ID"}
+            size={256}
+            bgColor="#ffffff"
+            fgColor="#000000"
+            level="H"
+          />
+        </div>
 
         <div className="redeem-code">
           {transaction?.id}
@@ -68,11 +70,6 @@ export default function CustomerRedeemView() {
           The employee will scan this code to complete the redemption.
         </p>
 
-        <Button
-          onClick={() => navigate(-1)}
-        >
-          Back
-        </Button>
 
       </div>
 

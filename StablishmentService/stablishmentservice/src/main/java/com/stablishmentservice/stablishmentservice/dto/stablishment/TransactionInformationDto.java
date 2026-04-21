@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor 
 @AllArgsConstructor
 public class TransactionInformationDto {
-    private int redeemedProducts;
+    private Integer transactionsQuantity;
     private int pointsAwarded;
 }

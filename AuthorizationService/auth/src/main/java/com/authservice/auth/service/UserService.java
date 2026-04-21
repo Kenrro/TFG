@@ -33,6 +33,9 @@ public class UserService {
             throw new GeneralException(AuthError.DATABASE_ERROR);
         }
     }
+    public User findEmployee(String username){
+        return userRepository.findEmployee(username).orElse(null);
+    }
 
     public User findById(Long id) {
         return userRepository.findById(id)

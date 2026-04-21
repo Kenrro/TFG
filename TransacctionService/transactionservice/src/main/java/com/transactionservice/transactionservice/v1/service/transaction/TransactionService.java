@@ -160,7 +160,8 @@ public class TransactionService {
         if (!(tx instanceof RedeemProductTransaction transaction)) {
             throw new GeneralException(TransactionError.INVALID_TRANSACTION_TYPE);
         }
-        if (!transaction.getStatus().equals(TransactionStatus.PENDING)) throw new GeneralException(TransactionError.TRANSACTION_ALREADY_PROCESSED);
+        if (transaction.getStatus().equals(TransactionStatus.COMPLETED) || transaction.getStatus().equals(TransactionStatus.FAILED)) throw new GeneralException(TransactionError.TRANSACTION_ALREADY_PROCESSED);
+        else if (transaction.getStatus().equals(TransactionStatus.EXPIRED)) throw new GeneralException(TransactionError.TRANSACTION_EXPIRED);
         // validate exp
         if (transaction.getExpiresAt().isBefore(Instant.now())) {
             transaction.setStatus(TransactionStatus.EXPIRED);
@@ -274,12 +275,9 @@ public class TransactionService {
         String stablishmentCode
     ) {
         List<Transaction> transactions = crudService.findByStablishment(stablishmentCode);
-        List<RedeemProductTransaction> redeemProductTransactions =
-        transactions.stream()
-            .filter(tx -> tx instanceof RedeemProductTransaction)
-            .map(tx -> (RedeemProductTransaction) tx)
-            .toList();
-        int redeemedProducts = redeemProductTransactions.size();
+
+        int totalTransactions = transactions.size();
+
         int pointsAwarded = transactions.stream()
             .filter(tx -> tx instanceof GivePointsTransaction)
             .map(tx -> (GivePointsTransaction) tx)
@@ -287,7 +285,7 @@ public class TransactionService {
             .sum();
         return TransactionInformationDto.builder()
         .pointsAwarded(pointsAwarded)
-        .redeemedProducts(redeemedProducts)
+        .transactionsQuantity(totalTransactions)
         .build();
     }
     // =========================================================

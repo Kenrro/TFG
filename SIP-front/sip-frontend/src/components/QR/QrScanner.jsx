@@ -17,7 +17,6 @@ export default function QrScanner({ onScan }) {
     scanner.render(
       (decodedText) => {
         onScan(decodedText);
-        scanner.clear();
       },
       () => {}
     );

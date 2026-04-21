@@ -8,8 +8,13 @@ import { useAuth } from "../../contex/AuthContext";
 import { decodeToken } from "../../utils/jwt";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import BackArrow from "../../components/ui/BackArrow";
+import AdminLayout from "../../components/layouts/AdminLayout";
+import ErrorModal from "./ErrorModal";
 
 export default function ProductsView() {
+  // Error
+  const [error, setError] = useState(null)
+
   const [productsModified, SetProductsModified] = useState(false)
   const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -57,6 +62,7 @@ export default function ProductsView() {
             SetProductsModified(!productsModified)
         } catch (err) {
             console.error(err)
+            setError(err.message)
         }
     }
     request()
@@ -68,6 +74,7 @@ export default function ProductsView() {
             SetProductsModified(!productsModified)
         } catch(err) {
             console.error(err)
+            setError(err.message)
         }
     }
     request()
@@ -81,13 +88,14 @@ export default function ProductsView() {
             SetProductsModified(!productsModified)
         } catch(err) {
             console.error(err)
+            setError(err.message)
         }
     }
     request()
   }
 
   return (
-    <AppLayout>
+    <>
 
       <div className="products-container">
         <BackArrow></BackArrow>
@@ -281,6 +289,12 @@ export default function ProductsView() {
             onCancel={() => setShowConfirm(false)}
         />
         )}
-    </AppLayout>
+        {error && (
+                <ErrorModal
+                  message={error}
+                  onClose={() => setError(null)}
+                />
+            )}
+    </>
   );
 }

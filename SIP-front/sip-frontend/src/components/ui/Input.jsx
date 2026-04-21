@@ -1,6 +1,6 @@
 import "../../styles/ui.css";
 
-export default function Input({ value, onChange, error, ...props }) {
+export default function Input({ value, required, onChange, error, ...props }) {
 
   const handleChange = (e) => {
     if (onChange) {
@@ -16,6 +16,7 @@ export default function Input({ value, onChange, error, ...props }) {
         value={value}
         onChange={handleChange}
         {...props}
+        required={required}
       />
 
       {error && (
@@ -23,7 +24,7 @@ export default function Input({ value, onChange, error, ...props }) {
           {error}
         </span>
       )}
-
+      
     </div>
   );
 }

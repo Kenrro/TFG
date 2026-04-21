@@ -2,19 +2,27 @@ import { useEffect, useState } from "react";
 import AppLayout from "../../components/layouts/AppLayout";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
-import "../../styles/settingsView.css";
+import "../../styles/SettingsView.css";
 import { getStablishments, updateStablishment, deleteStablishment } from "../../services/stablishmentService";
 import { getConfiguration, updateConfiguration } from "../../services/configurationService"
 import ConfirmModal from "../../components/ui/ConfirmModal"
 import { useAuth } from "../../contex/AuthContext";
+import AdminLayout from "../../components/layouts/AdminLayout";
+import { useStablishmentContext } from "../../contex/StablishmentContext";
+import ErrorModal from "./ErrorModal";
+import BackArrow from "../../components/ui/BackArrow";
+
 
 export default function SettingsView() {
+
+  const [error, setError] = useState(null)
 
   const [establishment, setEstablishment] = useState({
     name: "",
     description: "",
     address: ""
   });
+  const {stablishment, configuration} = useStablishmentContext()
   const { logout } = useAuth();
   const handleLogout = () => {
       logout();
@@ -25,34 +33,25 @@ export default function SettingsView() {
 
   // 🔄 LOAD DATA
   useEffect(() => {
-    async function load() {
-      try {
-        // TODO: tus services
-        const [est] = await getStablishments();
-        const conf = await getConfiguration();
-        console.log(conf)
-        setEstablishment({
-          name: est.name,
-          description: est.description,
-          address: est.address
-        });
+    if (stablishment.data && configuration.data) {
+      setEstablishment({
+        name: stablishment.data.name,
+        description: stablishment.data.description,
+        address: stablishment.data.address
+      });
 
-        setPoints(conf.points_per_euro);
-
-      } catch (e) {
-        console.error(e);
-      }
+      setPoints(configuration.data.points_per_euro);
     }
-
-    load();
-  }, []);
+  }, [stablishment.data, configuration.data]);
 
   // 💾 SAVE ESTABLISHMENT
   const handleSaveEstablishment = async () => {
     try {
       await updateStablishment(establishment);
+      stablishment.refetch()
     } catch (e) {
       console.error(e);
+      setError(e.message)
     }
   };
 
@@ -62,8 +61,10 @@ export default function SettingsView() {
       await updateConfiguration({
         point_per_euro: Number(points)
       });
+      await configuration.refetch()
     } catch (e) {
       console.error(e);
+      setError(e.message)
     }
   };
   const handleDeleteEstablishment = async () => {
@@ -73,11 +74,17 @@ export default function SettingsView() {
     handleLogout()
   } catch (e) {
     console.error(e);
+    setError(e.message)
   }
 };
-
+  if(stablishment.stablishmentLoading) {
+    return(
+      <div>Loading stablishment...</div>
+    )
+  }
   return (
-    <AppLayout>
+    <>
+    <BackArrow></BackArrow>
       <div className="settings-container">
 
         <h2 className="settings-title">
@@ -151,7 +158,14 @@ export default function SettingsView() {
           onCancel={() => setShowDeleteConfirm(false)}
         />
       )}
-    </AppLayout>
+
+      {error && (
+              <ErrorModal
+                message={error}
+                onClose={() => setError(null)}
+              />
+      )}
+    </>
     
   );
 }

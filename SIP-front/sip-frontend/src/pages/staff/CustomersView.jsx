@@ -3,6 +3,7 @@ import AppLayout from "../../components/layouts/AppLayout";
 import BackArrow from "../../components/ui/BackArrow";
 import "../../styles/CustomersView.css";
 import { getCustomers } from "../../services/stablishmentService";
+import AdminLayout from "../../components/layouts/AdminLayout";
 
 export default function CustomersView() {
 
@@ -38,7 +39,7 @@ export default function CustomersView() {
   }, []);
 
   return (
-    <AppLayout>
+    <>
 
       <div className="customers-container">
 
@@ -94,6 +95,6 @@ export default function CustomersView() {
 
       </div>
 
-    </AppLayout>
+    </>
   );
 }

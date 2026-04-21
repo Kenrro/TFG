@@ -105,3 +105,16 @@
   background: #F59E0B;
   color: white;
 }
+.icon-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.header-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}

@@ -24,7 +24,7 @@ export default function ConfirmModal({ title, message, onConfirm, onCancel }) {
                 className="confirm-btn"
                 onClick={onConfirm}
                 >
-                Leave
+                Confirm
                 </button>
 
             </div>

@@ -5,6 +5,8 @@ import Button from "../../components/ui/Button";
 import QRCode from "react-qr-code";
 import "../../styles/staffTransactions.css";
 import { createGivePointsTransaction } from "../../services/transactionService";
+import ErrorModal from "./ErrorModal";
+import BackArrow from "../../components/ui/BackArrow";
 
 export default function StaffGivePointsView() {
 
@@ -28,6 +30,7 @@ export default function StaffGivePointsView() {
       const res = await createGivePointsTransaction({
         amountSpent: Number(amount)
       });
+      console.log("Transaction created", res);
       setTransactionId(res.id);
 
     } catch (err) {
@@ -44,7 +47,7 @@ export default function StaffGivePointsView() {
 
   return (
     <AppLayout>
-
+      <BackArrow></BackArrow>
       <div className="staff-transaction-container">
 
         {!transactionId && (
@@ -91,10 +94,12 @@ export default function StaffGivePointsView() {
               <QRCode value={JSON.stringify({ id: transactionId })} size={220} />
             </div>
 
-            <p className="transaction-id">
-              Code: {transactionId}
+            <div className="transaction-id">
+              {transactionId}
+            </div>
+            <p className="redeem-help">
+             The customer will scan this code to complete the redemption.
             </p>
-
             <div className="staff-actions">
 
             <Button
@@ -113,7 +118,12 @@ export default function StaffGivePointsView() {
         )}
 
       </div>
-
+        {error && (
+        <ErrorModal
+          message={error}
+          onClose={() => setError(null)}
+        />
+    )}
     </AppLayout>
   );
 }

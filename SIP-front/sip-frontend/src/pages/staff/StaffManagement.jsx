@@ -9,62 +9,62 @@ import { useAuth } from "../../contex/AuthContext";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import BackArrow from "../../components/ui/BackArrow";
 import ChangePasswordModal from "./ChangePasswordModal"; 
+import useEmployees from "../../hooks/useEmployees";
+import AdminLayout from "../../components/layouts/AdminLayout";
+import { useStablishmentContext } from "../../contex/StablishmentContext";
+import ErrorModal from "./ErrorModal";
 
 export default function StaffManagement() {
-
-  const [filteredEmployees, setFilteredEmployees] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [staffMoified, setStaffModified] = useState(false);
+  
   const { token } = useAuth();
   const currentUser = decodeToken(token)
+  const { employees } = useStablishmentContext()
+  const filteredEmployees = employees.data?.filter(
+    (rel) => rel.userId.id !== currentUser.id
+  ) || []
+  const [showForm, setShowForm] = useState(false);
+  
+  // Error
+  const [error, setError] = useState()
+  
+  // Confirm modal
   const [showConfirm, setShowConfirm] = useState(false)
+  //
+  //Password
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-const [selectedUserId, setSelectedUserId] = useState(null);
+  //selected user
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [form, setForm] = useState({
     username: "",
     name: "",
     lastname: "",
     password: ""
   });
+  // user to edit
   const [editingId, setEditingId] = useState(null);
+  // edit form
   const [editForm, setEditForm] = useState({
     name: "",
     lastname: "",
     username: "",
     role: ""
   });
+  // user to delete
   const [deleteUserId, setDeleteUserId] = useState(null);
 
-  useEffect(() => {
-    const fetchStaff = async () => {
-      try {
-        const res = await getStaff();
-        console.log("staff", res.relations);
-        const currentUserId = decodeToken(token)?.id;
-        console.log("currentUserId", currentUserId);
-
-        const filteredEmployees = res.relations.filter(
-          (rel) => rel.userId.id !== currentUserId
-        );
-        setFilteredEmployees(filteredEmployees);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchStaff();
-  }, [staffMoified]);
+  // update fetch
   async function handleUpdateEmployee() {
     try {
       await updateEmployee(editingId, editForm);
-        setStaffModified(!staffMoified);
+        employees.refetch()
     } catch (err) {
       console.error(err);
     }
   }
+  // To create employees
   async function handleCreateEmployee() {
     try {
       if (form.password !== confirmPassword) {
@@ -73,9 +73,9 @@ const [selectedUserId, setSelectedUserId] = useState(null);
       }
 
       await createEmployee(form);
-      setStaffModified(!staffMoified);
+      employees.refetch()
 
-      // limpiar form (opcional pero recomendable)
+      // limpiar form 
       setForm({
         username: "",
         name: "",
@@ -86,19 +86,26 @@ const [selectedUserId, setSelectedUserId] = useState(null);
 
     } catch (err) {
       console.error(err);
+      setError(err.message)
     }
   }
   async function handleDeleteEmployee() {
     try {
       await deleteEmployee(deleteUserId);
       setShowConfirm(false)
-      setStaffModified(!staffMoified);
+      employees.refetch()
     } catch (err) {
       console.error(err);
+      setError(err.message)
     }
   }
   async function handleChangePassword(userId, newPassword) {
-    await changePassword(userId, { newPassword });
+    try {
+      await changePassword  (userId, { newPassword });
+    } catch(err) {
+      console.error(err)
+      setError(err.message)
+    }
   }
 
   const formatDate = (date) => {
@@ -107,8 +114,7 @@ const [selectedUserId, setSelectedUserId] = useState(null);
   };
   
   return (
-    <AppLayout>
-
+    <>
       <div style={{ width: "100%", padding: "20px" }}>
         <BackArrow></BackArrow>
         {/* TITLE */}
@@ -178,6 +184,7 @@ const [selectedUserId, setSelectedUserId] = useState(null);
               {filteredEmployees.map((rel) => {
                 const user = rel.userId;
                 const isEditing = editingId === user.id;
+                
 
                 return (
                   <tr key={user.id} style={{ borderTop: "1px solid #eee" }}>
@@ -434,7 +441,13 @@ const [selectedUserId, setSelectedUserId] = useState(null);
             onSubmit={handleChangePassword}
           />
         )}
-    </AppLayout>
+        {error && (
+                      <ErrorModal
+                        message={error}
+                        onClose={() => setError(null)}
+                      />
+              )}
+    </>
   );
 }
 

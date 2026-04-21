@@ -8,6 +8,7 @@ import com.stablishmentservice.stablishmentservice.dto.stablishment.Stablishment
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentDashboardResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentResponseDto;
+import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentWithConfigurationResponseDto;
 import com.stablishmentservice.stablishmentservice.entity.Stablishment;
 import com.stablishmentservice.stablishmentservice.service.stablishment.StablishmentService;
 
@@ -332,7 +333,65 @@ public class StablishmentController {
 
         return ResponseEntity.ok(response);
     }
-
+    // =========================================================
+    // GET STABLISHMENT WITH ROLE ADMIN
+    // =========================================================
+    @Operation(
+        summary = "Get establishment and configuration for admin",
+        description = "Retrieves the establishment information along with its configuration based on the authenticated ADMIN user.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Establishment and configuration retrieved successfully",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = StablishmentWithConfigurationResponseDto.class),
+                    examples = {
+                        @ExampleObject(
+                            name = "Establishment with configuration",
+                            summary = "Example response",
+                            value = """
+                            {
+                            "stablishment": {
+                                "name": "My Restaurant",
+                                "description": "Best burgers in town",
+                                "address": "123 Main Street",
+                                "code": "SAZ-0001"
+                            },
+                            "configuration": {
+                                "stablishmentCode": "SAZ-0001",
+                                "points_per_euro": 10
+                            }
+                            }
+                            """
+                        )
+                    }
+                )
+            ),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Forbidden - ADMIN role required"
+            ),
+            @ApiResponse(
+                responseCode = "500",
+                description = "Unexpected error"
+            )
+        }
+    )
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/admin/stablishment")
+    public ResponseEntity<StablishmentWithConfigurationResponseDto> getStablishmentFromAdmin(
+        @RequestHeader("Authorization")
+        @Parameter(description = "Bearer token for authentication")
+        String token
+    ) {
+        StablishmentWithConfigurationResponseDto response = stablishmentService.getStablishmentsByTokenAdmin(token);
+        return ResponseEntity.ok(response);
+    }
+    // =========================================================
+    // GET DASHBOARD
+    // =========================================================
     @PreAuthorize("hasAuthority('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/dashboard")

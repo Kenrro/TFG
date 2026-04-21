@@ -18,6 +18,7 @@ import com.stablishmentservice.stablishmentservice.dto.stablishment.Stablishment
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentDashboardResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentRequestDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentResponseDto;
+import com.stablishmentservice.stablishmentservice.dto.stablishment.StablishmentWithConfigurationResponseDto;
 import com.stablishmentservice.stablishmentservice.dto.stablishment.TransactionInformationDto;
 import com.stablishmentservice.stablishmentservice.entity.Stablishment;
 import com.stablishmentservice.stablishmentservice.entity.UserStablishment;
@@ -270,6 +271,34 @@ public class StablishmentService {
         ).toList();
 
     }
+    // =========================================================
+    // GET STABLISHMENT BY TOKEN ADMIN
+    // =========================================================
+    // Obtain all the establishments where the user is registered
+    public StablishmentWithConfigurationResponseDto getStablishmentsByTokenAdmin(String token) {
+        token = jwtUtil.cleanJwtToken(token);
+        String code = jwtUtil.getClaim(token, "establishmentCode", String.class);
+        Stablishment stb = stablishmentCRUDService.findByCode(code);
+        StablishmentConfigurationResponseDto configuration = getConfiguration(code);
+
+        return StablishmentWithConfigurationResponseDto.builder()
+            .configuration(configuration)
+            .stablishment(
+                StablishmentResponseDto.builder()
+                    .address(stb.getAddress())
+                    .code(stb.getCode())
+                    .name(stb.getName())
+                    .description(stb.getDescription())
+                    .build()
+            )
+            .build();
+    }
+        private StablishmentConfigurationResponseDto getConfiguration(String code) {
+            return webClientService.secureGetMethod(
+                configurationServiceUrl+"/stablishment/{code}/configuration", 
+                StablishmentConfigurationResponseDto.class, 
+                code);
+        }
     // =========================================================
     // DASHBOARD
     // =========================================================

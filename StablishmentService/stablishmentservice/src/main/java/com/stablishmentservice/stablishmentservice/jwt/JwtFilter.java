@@ -8,6 +8,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.stablishmentservice.stablishmentservice.enums.AuthorizationError;
+import com.stablishmentservice.stablishmentservice.exception.GeneralException;
 
 import io.jsonwebtoken.Claims;
 import java.io.IOException;
@@ -46,6 +48,8 @@ public class JwtFilter extends OncePerRequestFilter {
                                 new UsernamePasswordAuthenticationToken(username, null, authorities);
 
                         SecurityContextHolder.getContext().setAuthentication(authToken);
+                    } else {
+                        throw new GeneralException(AuthorizationError.EXPIRED_TOKEN);
                     }
                 }
                 filterChain.doFilter(request, response);

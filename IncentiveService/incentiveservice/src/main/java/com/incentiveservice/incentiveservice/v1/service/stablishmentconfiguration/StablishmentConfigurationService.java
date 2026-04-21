@@ -19,11 +19,23 @@ public class StablishmentConfigurationService {
     // =========================================================
     // GET STABLISHMENT BY CODE
     // =========================================================
-    public StablishmentConfigurationResponseDto getByStablishmentCode(
+    public StablishmentConfigurationResponseDto getByToken(
         String token
     ) {
         token = jwtUtil.cleanJwtToken(token);
         String code = jwtUtil.getClaim(token, "establishmentCode", String.class);
+        StablishmentConfiguration stablishmentConfiguration = stablishmentConfigurationCRUDService.findByStablishmentCode(code);
+        return StablishmentConfigurationResponseDto.builder()
+        .stablishmentCode(stablishmentConfiguration.getStablishmentCode())
+        .points_per_euro(stablishmentConfiguration.getPointsPerEuro())
+        .build();
+    }
+    // =========================================================
+    // GET STABLISHMENT BY CODE
+    // =========================================================
+    public StablishmentConfigurationResponseDto getByStablishmentCode(
+        String code
+    ) {
         StablishmentConfiguration stablishmentConfiguration = stablishmentConfigurationCRUDService.findByStablishmentCode(code);
         return StablishmentConfigurationResponseDto.builder()
         .stablishmentCode(stablishmentConfiguration.getStablishmentCode())

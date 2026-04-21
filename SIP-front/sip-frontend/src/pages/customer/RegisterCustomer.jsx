@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../../styles/RegisterCustomer.css";
 import { registerCustomer } from "../../services/authService";
 import Input from "../../components/ui/Input";
@@ -80,6 +80,7 @@ export default function RegisterCustomer() {
                   onChange={(value) =>
                     setForm({ ...form, password: value })
                   }
+                  required
                 />
         
                 <span
@@ -101,6 +102,7 @@ export default function RegisterCustomer() {
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Repeat password"
                 onChange={(v) => setConfirmPassword(v)}
+                required
               />
         
               <span
@@ -129,12 +131,13 @@ export default function RegisterCustomer() {
             )}
 
       {error && <p className="auth-error">{error}</p>}
-      <p className="login__register">
-        Ya tienes una cuenta{" "}
-        <span style={{color: "#11f", cursor: "pointer"}} onClick={() => navigate("/login")}>
-          Iniciar sesión
-        </span>
-      </p>
+      
+        <p className="login__register"> 
+              Ya tienes una cuenta{" "}
+              <Link to="/login" style={{ color: "#11f" }}>
+                Iniciar sesión
+              </Link>
+          </p> 
         <button className="auth-button" disabled={loading}>
         {loading ? "Creando..." : "Crear cuenta"}
         </button>

@@ -6,6 +6,8 @@ import Button from "../../components/ui/Button";
 import "../../styles/scan.css";
 import { addPoints } from "../../services/transactionService";
 import QrScanner from "../../components/QR/QrScanner";
+import BackArrow from "../../components/ui/BackArrow";
+
 
 export default function CustomerScanView() {
 
@@ -78,7 +80,7 @@ export default function CustomerScanView() {
 
   return (
     <AppLayout>
-
+      <BackArrow></BackArrow>
       <div className="scan-container">
 
         <h2 className="scan-title">

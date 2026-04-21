@@ -228,7 +228,7 @@ public class TransactionController {
         );
     }
     // =========================================================
-    // GET REDEEM TRANSACTIONS
+    // GET information
     // =========================================================
     @Operation(
         summary = "Get redeem transactions",

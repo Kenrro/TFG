@@ -4,6 +4,7 @@ import { getDashboard } from "../../services/stablishmentService";
 import "../../styles/adminDashboard.css";
 import ErrorState from "../../components/ui/ErrorState";
 import { useNavigate } from "react-router-dom";
+import AdminLayout from "../../components/layouts/AdminLayout";
 
 import {
   Users,
@@ -13,13 +14,16 @@ import {
   Gift,
   ShoppingCart
 } from "lucide-react";
+import ErrorModal from "./ErrorModal";
 
 export default function AdminDashboard() {
 
+  // Dashboard data
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
+  // Navigate
   const navigate = useNavigate();
-
+  // fetch dashboard data
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
@@ -36,25 +40,21 @@ export default function AdminDashboard() {
 
   if (error) {
     return (
-      <AppLayout>
         <ErrorState 
           message="Error loading dashboard"
           onRetry={() => window.location.reload()}
         />
-      </AppLayout>
     );
   }
 
   if (!data) {
     return (
-      <AppLayout>
         <p>Loading dashboard...</p>
-      </AppLayout>
     );
   }
 
   return (
-    <AppLayout>
+    <>
       <div className="dashboard-container">
 
         <h2 className="dashboard-title">Dashboard</h2>
@@ -75,7 +75,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="card users" onClick={() => navigate("/staff/management")}>
+            <div className="card users" onClick={() => navigate("/admin/management")}>
               <div className="card-icon">
                 <Briefcase size={22} />
               </div>
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
           <div>
             <h3>Transactions</h3>
             <p className="big">
-              {data.transactionInformation.redeemedProducts}
+              {data.transactionInformation.transactionsQuantity} transactions
             </p>
             <span>
               {data.transactionInformation.pointsAwarded} pts awarded
@@ -134,6 +134,12 @@ export default function AdminDashboard() {
         </div>
 
       </div>
-    </AppLayout>
+      {error && (
+        <ErrorModal
+          message={error}
+          onClose={() => setError(null)}
+        />
+)}
+    </>
   );
 }

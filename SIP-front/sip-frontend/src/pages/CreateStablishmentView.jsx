@@ -4,7 +4,7 @@ import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import ErrorMessage from "../components/ui/ErrorMessage";
 import { createEstablishment } from "../services/stablishmentService";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { jsPDF } from "jspdf";
 
 export default function CreateEstablishmentView() {
@@ -30,7 +30,8 @@ export default function CreateEstablishmentView() {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setError(null);
 
     if (form.adminPassword !== confirmPassword) {
@@ -111,20 +112,24 @@ export default function CreateEstablishmentView() {
 
       <ErrorMessage>{error}</ErrorMessage>
 
-      <div className="form-container">
+      <form className="form-container" onSubmit={
+        handleSubmit
+      }>
 
-        <Input placeholder="Establishment name" onChange={handleChange("name")} />
-        <Input placeholder="Address" onChange={handleChange("address")} />
-        <Input placeholder="Description" onChange={handleChange("description")} />
+
+        <Input placeholder="Establishment name" onChange={handleChange("name")} required/>
+        <Input placeholder="Address" onChange={handleChange("address")} required/>
+        <Input placeholder="Description" onChange={handleChange("description")} required/>
 
         <h3 className="form-section">Admin</h3>
 
-        <Input placeholder="Admin username" onChange={handleChange("adminUsername")} />
+        <Input placeholder="Admin username" onChange={handleChange("adminUsername")} required/>
         <div style={{ position: "relative" }}>
         <Input
           type={showPassword ? "text" : "password"}
           placeholder="Admin password"
           onChange={handleChange("adminPassword")}
+          required
         />
 
         <span
@@ -145,7 +150,8 @@ export default function CreateEstablishmentView() {
       <Input
         type={showConfirmPassword ? "text" : "password"}
         placeholder="Repeat password"
-        onChange={(v) => setConfirmPassword(v)}
+        onChange={(v) => setConfirmPassword(v)} 
+        required
       />
 
       <span
@@ -172,19 +178,19 @@ export default function CreateEstablishmentView() {
           : "Passwords do not match"}
       </span>
     )}
-        <Input placeholder="Admin name" onChange={handleChange("adminName")} />
-        <Input placeholder="Admin lastname" onChange={handleChange("adminLastname")} />
+        <Input placeholder="Admin name" onChange={handleChange("adminName")} required/>
+        <Input placeholder="Admin lastname" onChange={handleChange("adminLastname")} required/>
         <p className="login__register"> 
-            ¿Eres miembro de un establecimiento?{" "}
-            <span style={{color: "#11f", cursor: "pointer"}} onClick={() => navigate("/login")}>
-              Accede a tu cuenta
-            </span>
+              Ya tienes una cuenta{" "}
+              <Link to="/login" style={{ color: "#11f" }}>
+                Iniciar sesión
+              </Link>
           </p>
-        <Button loading={loading} onClick={handleSubmit}>
+        <Button loading={loading}>
           Create establishment
         </Button>
 
-      </div>
+      </form>
 
     </AuthLayout>
   );
